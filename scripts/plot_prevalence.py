@@ -268,7 +268,6 @@ for species_name in good_species_list:
     #ax.hist(freqs_log10, bins=30, density=True, alpha=0.7)
     #ax.plot(x_range, gamma.pdf(x_range, ag, bg,cg), 'k', lw=2)
 
-    print(var_freqs_no_zeros_list)
 
     ax.scatter(mean_freqs_no_zeros_list, var_freqs_no_zeros_list, alpha=0.2)
 

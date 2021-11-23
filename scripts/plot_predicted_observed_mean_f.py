@@ -45,7 +45,7 @@ for column_idx, column in enumerate(nested_species_list):
             ax = fig.add_subplot(gs[column_idx, row_idx])
 
 
-            predicted_prevalence = prevalence_dict[row]['all']['4D']['predicted_f_mean_f_mean_to_plot']
+            predicted_prevalence = prevalence_dict[row]['all']['4D']['predicted_f_mean_to_plot']
             predicted_prevalence = numpy.asarray(predicted_prevalence)
 
             observed_prevalence = prevalence_dict[row]['all']['4D']['f_mean_to_plot']
@@ -100,5 +100,6 @@ for column_idx, column in enumerate(nested_species_list):
 
 fig.tight_layout()
 fig.subplots_adjust(hspace=0.2)
-fig.savefig("%spredicted_observed_f_mean.png" % config.analysis_directory, format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+# , dpi = 600
+fig.savefig("%spredicted_observed_f_mean.png" % config.analysis_directory, format='png', bbox_inches = "tight", pad_inches = 0.4)
 plt.close()

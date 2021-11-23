@@ -3,7 +3,7 @@ import config
 import parse_midas_data
 import os.path
 import os
-import pylab
+#import pylab
 import sys
 import numpy
 import gzip

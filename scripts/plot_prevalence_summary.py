@@ -28,7 +28,7 @@ from scipy.stats import gamma, gaussian_kde
 
 import parse_HMP_data
 import figure_utils
-import calculate_predicted_occupancy
+import calculate_predicted_prevalence
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -38,14 +38,25 @@ allowed_variant_types = set(['1D','4D'])
 
 subject_sample_map = parse_HMP_data.parse_subject_sample_map()
 
+
+clade_type = 'all'
+#clade_type = 'all'
+pi_type = 'pi_include_boundary'
+variant_type = '4D'
+
+
 good_species = 'Eubacterium_rectale_56927'
-bad_species = 'Bacteroides_vulgatus_57955'
+#bad_species = 'Bacteroides_vulgatus_57955'
 
 
 min_sample_size = config.between_host_min_sample_size
 low_divergence_threshold = config.between_low_divergence_threshold
 
+prevalence_dict = calculate_predicted_occupancy.load_predicted_prevalence_dict_all()
+
+
 prevalence_dict = calculate_predicted_occupancy.load_predicted_prevalence_subsample_dict()
+
 
 prevalence_min = 0.1
 prevalence_max = 0.42
@@ -53,16 +64,22 @@ prevalence_range = numpy.logspace(-2.5, 0, num=1000)
 
 
 
-fig = plt.figure(figsize = (8, 12)) #
+fig = plt.figure(figsize = (8, 8)) #
 fig.subplots_adjust(bottom= 0.15)
 
-ax_prevalence_survival = plt.subplot2grid((3, 2), (0,0), colspan=2)
+ax_prevalence_survival = plt.subplot2grid((2, 2), (0,0), colspan=2)
 
-ax_good_species = plt.subplot2grid((3, 2), (1,0), colspan=1)
-ax_bad_species = plt.subplot2grid((3, 2), (1,1), colspan=1)
+ax_good_species = plt.subplot2grid((2, 2), (1,0), colspan=1)
 
-ax_good_species_fmax = plt.subplot2grid((3, 2), (2,0), colspan=1)
-ax_bad_species_fmax = plt.subplot2grid((3, 2), (2,1), colspan=1)
+ax_good_species_fmax = plt.subplot2grid((2, 2), (1,1), colspan=1)
+
+
+fontsize = 9
+
+ax_prevalence_survival.text(0.01, 1.06, figure_utils.sub_plot_labels[0], fontsize=fontsize, fontweight='bold', ha='center', va='center', transform=ax_prevalence_survival.transAxes)
+
+ax_good_species.text(0.01, 1.06, figure_utils.sub_plot_labels[1], fontsize=fontsize, fontweight='bold', ha='center', va='center', transform=ax_good_species.transAxes)
+ax_good_species_fmax.text(0.01, 1.06, figure_utils.sub_plot_labels[2], fontsize=fontsize, fontweight='bold', ha='center', va='center', transform=ax_good_species_fmax.transAxes)
 
 
 for species_name in prevalence_dict.keys():
@@ -75,7 +92,7 @@ for species_name in prevalence_dict.keys():
 
     survival_array = numpy.asarray(survival_array)
 
-    if species_name in prevalence_utils.good_bad_color_dict:
+    if species_name == good_species:
         color = prevalence_utils.good_bad_color_dict[species_name]
         zorder=2
         alpha=1
@@ -94,18 +111,16 @@ for species_name in prevalence_dict.keys():
 
 
 ax_prevalence_survival.legend(loc="lower left", fontsize=10)
-
 ax_prevalence_survival.set_xlim([0.008, 1.05])
-
 ax_prevalence_survival.set_xscale('log', basex=10)
 ax_prevalence_survival.set_yscale('log', basey=10)
-
-
 ax_prevalence_survival.set_xlabel('Observed SNV prevalence, ' + r'$\hat{\varrho}$', fontsize=14)
 ax_prevalence_survival.set_ylabel('Fraction of SNVs ' + r'$\geq \hat{\varrho}$', fontsize=14)
 
 
-for species_list in [[ax_good_species, ax_good_species_fmax, good_species], [ax_bad_species, ax_bad_species_fmax, bad_species]]:
+
+
+for species_list in [[ax_good_species, ax_good_species_fmax, good_species]]:
 
 
     ax_species = species_list[0]
@@ -122,9 +137,9 @@ for species_list in [[ax_good_species, ax_good_species_fmax, good_species], [ax_
     f_max = prevalence_dict[species_name]['all']['4D']['f_max']['to_plot']
     f_max = numpy.asarray(f_max)
 
-
     f_max_line = prevalence_dict[species_name]['all']['4D']['f_max_line']
-    predicted_prevalence_line = prevalence_dict[species_name]['all']['4D']['predicted_prevalence_line']
+
+    predicted_prevalence_line = prevalence_dict[species_name]['all']['4D']['f_max_vs_predicted_prevalence_line']
 
     f_max_line = numpy.asarray(f_max_line)
     predicted_prevalence_line = numpy.asarray(predicted_prevalence_line)
@@ -141,7 +156,10 @@ for species_list in [[ax_good_species, ax_good_species_fmax, good_species], [ax_
 
     ax_ = ax_species.scatter(x, y, c=z, cmap=prevalence_utils.good_bad_color_map_dict[species_name], s=70, alpha=0.9, edgecolor='')
 
-    ax_species.plot([min(observed_prevalence)*0.8, max(observed_prevalence)*1.1],[min(observed_prevalence)*0.8, max(observed_prevalence)*1.1], ls='--', lw=2, c='k')
+    ax_species.scatter(10**-8, 10**-8, c=prevalence_utils.good_bad_color_dict[species_name], label='One SNV')
+
+
+    ax_species.plot([min(observed_prevalence)*0.8, max(observed_prevalence)*1.1],[min(observed_prevalence)*0.8, max(observed_prevalence)*1.1], ls='--', lw=2, c='k', label='1:1')
 
     ax_species.set_xscale('log', basex=10)
     ax_species.set_yscale('log', basey=10)
@@ -149,9 +167,14 @@ for species_list in [[ax_good_species, ax_good_species_fmax, good_species], [ax_
     ax_species.set_xlabel('Observed SNV prevalence', fontsize=14)
     ax_species.set_ylabel('Predicted SNV prevalence', fontsize=14)
 
-    #ax.set_title(species_name)
+
+    ax_species.set_xlim([min(observed_prevalence)*0.8, max(observed_prevalence)*1.1])
+    ax_species.set_ylim([min(observed_prevalence)*0.8, max(observed_prevalence)*1.1])
+
 
     ax_species.set_title(figure_utils.get_pretty_species_name(species_name), fontsize=12, fontweight='bold', color='k' )
+
+    ax_species.legend(loc="upper left", fontsize=10)
 
 
 
@@ -169,21 +192,14 @@ for species_list in [[ax_good_species, ax_good_species_fmax, good_species], [ax_
 
     #ax.set_xlim([min(f_max)*0.8, max(f_max)*1.1])
     ax_species_fmax.set_xlim([min(f_max)*0.8, 0.2])
-
     ax_species_fmax.set_ylim([min(observed_prevalence)*0.8, max(observed_prevalence)*1.1])
-
 
     ax_species_fmax.scatter(x, y, c=z, cmap=prevalence_utils.good_bad_color_map_dict[species_name], s=25, alpha=0.9, edgecolor='', zorder=1)
 
     ax_species_fmax.plot(10**f_max_line, 10**predicted_prevalence_line, c='k', lw = 3, ls='--', label = 'Gamma prediction', zorder=2)
-
-
-    ax_species_fmax.scatter(10**-5, 10**-5, c=prevalence_utils.good_bad_color_dict[species_name], label='Observation')
-
-
+    ax_species_fmax.scatter(10**-5, 10**-5, c=prevalence_utils.good_bad_color_dict[species_name], label='Observation of one SNV')
 
     ax_species_fmax.set_title(figure_utils.get_pretty_species_name(species_name), fontsize=12, fontweight='bold', color='k' )
-
 
     ax_species_fmax.set_xscale('log', basex=10)
     ax_species_fmax.set_yscale('log', basey=10)

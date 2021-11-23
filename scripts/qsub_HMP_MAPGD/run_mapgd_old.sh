@@ -37,7 +37,7 @@ samtools mpileup -q 20 -Q 25 -B 700175331_sorted.bam 700175086_sorted.bam \
 
 
 samtools mpileup -q 20 -Q 25 -B 700175331_sorted.bam 700173377_sorted.bam \
-| mapgd proview -H /u/home/w/wrshoema/project-ngarud/negative_selection_microbiome/scripts/qsub_HMP_MAPGD/test_sorted.header | mapgd pool -a 22 -o allelefrequency-filtered
+| mapgd proview -H /u/home/w/wrshoema/project-ngarud/snv_prevalence/scripts/qsub_HMP_MAPGD/test_sorted.header | mapgd pool -a 22 -o allelefrequency-filtered
 
 
 

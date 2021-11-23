@@ -75,7 +75,7 @@ for column_idx, column in enumerate(nested_species_list):
         #ax.scatter(f_max, observed_prevalence, s=25, alpha=0.9, edgecolor='', zorder=1)
 
         f_max_line = prevalence_dict[row]['all']['4D']['f_max_line']
-        predicted_prevalence_line = prevalence_dict[row]['all']['4D']['predicted_prevalence_line']
+        predicted_prevalence_line = prevalence_dict[row]['all']['4D']['f_max_vs_predicted_prevalence_line']
 
         f_max_line = numpy.asarray(f_max_line)
         predicted_prevalence_line = numpy.asarray(predicted_prevalence_line)
@@ -112,5 +112,5 @@ for column_idx, column in enumerate(nested_species_list):
 
 fig.tight_layout()
 fig.subplots_adjust(hspace=0.2)
-fig.savefig("%sf_max_vs_prevalence.png" % config.analysis_directory, format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig.savefig("%sf_max_vs_prevalence.png" % config.analysis_directory, format='png', bbox_inches = "tight", pad_inches = 0.4)
 plt.close()

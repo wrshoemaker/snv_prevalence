@@ -20,3 +20,6 @@ def get_abbreviated_species_name(species_name):
 
 
 clade_type_label_dict = {'all': 'All hosts', 'largest_clade': 'Largest clade'}
+
+
+sub_plot_labels = ['a','b','c', 'd','e','f', 'g','h','i']

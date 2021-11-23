@@ -21,6 +21,8 @@ from scipy.stats import gamma, gaussian_kde
 
 import calculate_predicted_occupancy
 
+import prevalence_utils
+
 data_directory = config.data_directory
 allowed_variant_types = set(['1D','4D'])
 clade_types = ['all','largest_clade']
@@ -38,9 +40,34 @@ mre_1d = [prevalence_dict[species_name]['all']['1D']['MRE'] for species_name in 
 
 fig, ax = plt.subplots(figsize=(4,4))
 
-ax.plot([min(mre_4d)*0.8, max(mre_4d)*1.1],[min(mre_1d)*0.8, max(mre_1d)*1.1], ls='--', c='k')
+ax.plot([min(mre_4d)*0.8, max(mre_4d)*1.1],[min(mre_1d)*0.8, max(mre_1d)*1.1], ls='--', c='k', zorder=1, label='1:1 line')
 
-ax.scatter(mre_4d, mre_1d, c='k', label='Species')
+ax.scatter(mre_4d, mre_1d, c='k',  zorder=2)
+
+
+
+
+good_species = 'Eubacterium_rectale_56927'
+bad_species = 'Bacteroides_vulgatus_57955'
+
+mre_4d_good_species = prevalence_dict[good_species]['all']['4D']['MRE']
+mre_1d_good_species = prevalence_dict[good_species]['all']['1D']['MRE']
+
+mre_4d_bad_species = prevalence_dict[bad_species]['all']['4D']['MRE']
+mre_1d_bad_species = prevalence_dict[bad_species]['all']['1D']['MRE']
+
+
+ax.scatter(mre_4d_good_species, mre_1d_good_species, c=prevalence_utils.good_bad_color_dict[good_species], label=figure_utils.get_pretty_species_name(good_species),  zorder=3)
+
+ax.scatter(mre_4d_bad_species, mre_1d_bad_species, c=prevalence_utils.good_bad_color_dict[bad_species], label=figure_utils.get_pretty_species_name(bad_species),  zorder=3)
+
+
+
+
+
+
+
+#error_4d_vs_1d.png
 
 ax.legend(loc='upper left')
 

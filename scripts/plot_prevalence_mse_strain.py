@@ -25,6 +25,8 @@ import prevalence_utils
 
 import calculate_predicted_occupancy
 
+numpy.random.seed(123456789)
+
 min_sample_size = config.between_host_min_sample_size
 low_divergence_threshold = config.between_low_divergence_threshold
 

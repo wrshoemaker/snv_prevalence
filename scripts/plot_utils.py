@@ -1,5 +1,5 @@
 import matplotlib
-matplotlib.use('Agg')
+#matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import parse_midas_data as pmd
 import midas_db_utils
@@ -75,7 +75,8 @@ def get_species_color_map(all_species = pmd.parse_species_list()):
 			all_phyla.add(phylum)
 			phylum_species_map[phylum].append(species)
 		except:
-			print(species) # Guyana massiliensis is unclassified, skip for now
+			continue
+			#print(species) # Guyana massiliensis is unclassified, skip for now
 
 	# There are the following 7 phyla in these gut microbiota
 	species_color_map = {}
