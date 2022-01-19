@@ -16,18 +16,17 @@ module load python/2.7.15
 
 species=$1
 
-#python /u/project/ngarud/wrshoema/snv_prevalence/scripts/calculate_predicted_prevalence.py --estimate_pi
 python /u/project/ngarud/wrshoema/snv_prevalence/scripts/calculate_predicted_prevalence_mapgd.py --species ${species}
 
+#python /u/project/ngarud/wrshoema/snv_prevalence/scripts/calculate_predicted_prevalence_mapgd.py --make_alleles_dict ${species}
 
 #python /u/project/ngarud/wrshoema/snv_prevalence/scripts/calculate_predicted_prevalence_mapgd.py --make_alleles_dict ${species}
 
 
 
-#python /u/project/ngarud/wrshoema/snv_prevalence/scripts/calculate_predicted_prevalence.py --species Alistipes_finegoldii_56071
+#python /u/project/ngarud/wrshoema/snv_prevalence/scripts/calculate_predicted_prevalence_mapgd.py --species Alistipes_finegoldii_56071
 
 
-#python /u/project/ngarud/wrshoema/snv_prevalence/scripts/calculate_predicted_prevalence.py --subsample_predictions
-
+python /u/project/ngarud/wrshoema/snv_prevalence/scripts/calculate_predicted_prevalence_mapgd.py --make_frequency_dict_mapgd_non_zero
 
 # qrsh -l h_rt=3:00:00,h_data=24G

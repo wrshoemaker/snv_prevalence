@@ -8,14 +8,14 @@ import sys
 species = 'Bacteroides_vulgatus_57955'
 
 
-dir = "/u/home/w/wrshoema/project-ngarud/HMP_MAPGD/midas_output_bam/%s/" % species
+dir = "/u/home/w/wrshoema/project-ngarud/snv_prevalence/data/midas_output_bam/%s/" % species
 
 
 #dir = "/u/home/w/wrshoema/project-ngarud/HMP_MAPGD/midas_output_bam/%s/" % 'Bacteroides_vulgatus_57955'
 
 
 # loop through BED file
-bed_filepath = "/u/home/w/wrshoema/project-ngarud/HMP_MAPGD/rep_genomes/%s/genome.bed" % species
+bed_filepath = "/u/home/w/wrshoema/project-ngarud/snv_prevalence/data/rep_genomes/%s/genome.bed" % species
 file_bed = open(bed_filepath, "r")
 scaffolds_to_keep = []
 #file_bed.readline() # header

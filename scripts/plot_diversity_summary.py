@@ -21,324 +21,287 @@ import matplotlib.gridspec as gridspec
 from matplotlib.lines import Line2D
 
 import calculate_predicted_prevalence_mapgd
-import calculate_predicted_prevalence
-
 
 import plot_utils
 
 species_color_map, ordered_species_list = plot_utils.get_species_color_map()
 
-
-prevalence_dict_mapgd = calculate_predicted_prevalence_mapgd.load_predicted_prevalence_dict_all()
-
-#prevalence_dict_mapgd = calculate_predicted_prevalence_mapgd.load_predicted_prevalence_subsample_dict()
+prevalence_dict_mapgd = calculate_predicted_prevalence_mapgd.load_predicted_prevalence_dict_all()#test=True)
 
 species_list = list(prevalence_dict_mapgd.keys())
 species_list.sort()
 
-
-#fig, ax = plt.subplots(figsize=(4,4))
-
-clade_type = 'no_strains'
+clade_type = 'all'
 #clade_type = 'all'
 pi_type = 'pi_include_boundary'
-variant_type = '4D'
-max_n_occurances = 7
+f_mean_upper_cutoff_taylor = 0.35
+max_n_occurances = 20
+max_n_occurances_range = list(range(1, max_n_occurances+1))
 
-fig = plt.figure(figsize = (11, 8)) #
-#fig.subplots_adjust(bottom= 0.1)
 
-ax_f = plt.subplot2grid((2, 2), (0, 0), colspan=1)
-ax_f_mean = plt.subplot2grid((2, 2), (0, 1), colspan=1)
-ax_f_mean_vs_var = plt.subplot2grid((2, 2), (1, 0), colspan=1)
-#ax_f_prevalence = plt.subplot2grid((2, 2), (1, 0), colspan=1)
-ax_f_max_vs_prevalence = plt.subplot2grid((2, 2), (1, 1), colspan=1)
 
-ax_f.text(-0.1, 1.02, 'a', fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_f.transAxes)
-ax_f_mean.text(-0.1, 1.02, 'b', fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_f_mean.transAxes)
-#ax_f_prevalence.text(-0.1, 1.02, 'c', fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_f_prevalence.transAxes)
-ax_f_max_vs_prevalence.text(-0.1, 1.02, 'd', fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_f_max_vs_prevalence.transAxes)
 
+def get_f_no_zeros_dict(species_name, clade_type='all'):
 
-if clade_type == 'all':
-    min_prevalence = 0.3
-else:
-    min_prevalence = 0.1
+    intermediate_filename_template = config.data_directory+"frequency_dict_mapgd_non_zero/%s_%s.dat"
+    intermediate_filename = intermediate_filename_template % (species_name, clade_type)
 
+    with open(intermediate_filename, 'rb') as handle:
+        b = pickle.load(handle)
+    return b
 
-# sort species names
-species_n_sites_list = []
-for species_name in species_list:
-    observed_prevalence_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['observed_prevalence_mapgd']
-    observed_prevalence_mapgd = numpy.asarray(observed_prevalence_mapgd)
-    n_sites = sum(observed_prevalence_mapgd >= min_prevalence)
-    species_n_sites_list.append((species_name, n_sites))
 
-species_n_sites_list.sort(key=lambda tup: tup[1])
-species_n_sites_list = species_n_sites_list[::-1]
-species_list_to_plot = [s[0] for s in species_n_sites_list]
+def make_plot(variant_type):
 
+    fig = plt.figure(figsize = (12, 8)) #
 
 
-means_all = []
-variances_all = []
-f_max_all = []
-prevalence_all = []
-n_non_zero_f_all = []
+    ax_n_hosts = plt.subplot2grid((2, 3), (0, 0), colspan=1)
+    ax_n_sites = plt.subplot2grid((2, 3), (1, 0), colspan=1)
+    ax_f = plt.subplot2grid((2, 3), (0, 1), colspan=1)
+    ax_f_mean = plt.subplot2grid((2, 3), (1, 1), colspan=1)
+    ax_f_mean_vs_var = plt.subplot2grid((2, 3), (0, 2), colspan=1)
+    ax_f_prevalence = plt.subplot2grid((2, 3), (1, 2), colspan=1)
 
-species_list_to_plot_good = []
-for species_name in species_list_to_plot:
+    ax_all = [ax_n_hosts, ax_n_sites, ax_f, ax_f_mean, ax_f_mean_vs_var, ax_f_prevalence]
 
-    f_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_no_zeros_mapgd']
-    f_mapgd = numpy.asarray(f_mapgd)
+    for ax_idx, ax in enumerate(ax_all):
+        ax.text(-0.1, 1.04, prevalence_utils.sub_plot_labels[ax_idx], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax.transAxes)
 
-    n_non_zero_f = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['n_non_zero_frequencies']
-    n_non_zero_f = numpy.asarray(n_non_zero_f)
 
-    f_mean_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_mean_mapgd']
-    f_mean_mapgd = numpy.asarray(f_mean_mapgd)
+    if clade_type == 'all':
+        min_prevalence = 0.35
+    else:
+        min_prevalence = 0.1
 
-    f_var_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_var_mapgd']
-    f_var_mapgd = numpy.asarray(f_var_mapgd)
 
-    f_max_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_max_mapgd']
-    f_max_mapgd = numpy.asarray(f_max_mapgd)
+    relative_richness_dict, n_samples_dict, proprtion_richness = prevalence_utils.get_relative_richness_dict(variant_type=variant_type)
 
-    observed_prevalence_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['observed_prevalence_mapgd']
-    observed_prevalence_mapgd = numpy.asarray(observed_prevalence_mapgd)
 
-    if len(f_mapgd) == 0:
-        continue
+    # plot number of hosts
+    species_n_hosts_list = [(species_name, n_samples_dict[species_name]) for species_name in species_list]
+    species_n_hosts_list.sort(key=lambda tup: tup[1])
+    species_n_hosts_list = species_n_hosts_list[::-1]
+    species_list_hosts_to_plot = [s[0] for s in species_n_hosts_list]
+    hosts_to_plot = [s[1] for s in species_n_hosts_list]
 
-    f_mean_mapgd_to_plot = f_mean_mapgd[observed_prevalence_mapgd >= min_prevalence]
-    f_var_mapgd_to_plot = f_var_mapgd[observed_prevalence_mapgd >= min_prevalence]
+    species_list_hosts_to_plot_pretty = [figure_utils.get_pretty_species_name(s) for s in species_list_hosts_to_plot]
+    colors_hosts = [species_color_map[s] for s in species_list_hosts_to_plot]
+    ax_n_hosts.barh(species_list_hosts_to_plot_pretty, hosts_to_plot, height=0.8, align='center', color=colors_hosts)
+    ax_n_hosts.set_xlabel('Number of hosts', fontsize=11)
+    ax_n_hosts.xaxis.set_tick_params(labelsize=8)
+    ax_n_hosts.yaxis.set_tick_params(labelsize=7)
+    ax_n_hosts.set_ylim([-0.6, len(species_list_hosts_to_plot_pretty)-0.3])
 
-    f_mapgd_log10 = numpy.log10(f_mapgd)
-    f_mapgd_log10_rescaled = (f_mapgd_log10 - numpy.mean(f_mapgd_log10)) / numpy.std(f_mapgd_log10)
-    hist_f, bin_edges_f = numpy.histogram(f_mapgd_log10_rescaled, density=True, bins=20)
-    bins_mean_f = [0.5 * (bin_edges_f[i] + bin_edges_f[i+1]) for i in range(0, len(bin_edges_f)-1 )]
-    bins_mean_f = numpy.asarray(bins_mean_f)
-    hist_f_to_plot = hist_f[hist_f>0]
-    bins_mean_f_to_plot = bins_mean_f[hist_f>0]
 
-    ax_f.scatter(bins_mean_f_to_plot, hist_f_to_plot, alpha=0.9, s=10, c=species_color_map[species_name])
-    # label=figure_utils.get_pretty_species_name(species_name)
+    # plot number of snvs
+    # sort species names
+    species_n_sites_list = []
+    for species_name in species_list:
+        observed_prevalence_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['observed_prevalence_mapgd_slm']
+        observed_prevalence_mapgd = numpy.asarray(observed_prevalence_mapgd)
+        #n_sites = sum(observed_prevalence_mapgd >= min_prevalence)
+        n_sites = len(observed_prevalence_mapgd)
+        species_n_sites_list.append((species_name, n_sites))
 
+    species_n_sites_list.sort(key=lambda tup: tup[1])
+    species_n_sites_list = species_n_sites_list[::-1]
+    species_list_sites_to_plot = [s[0] for s in species_n_sites_list]
+    n_sites_to_plot = [s[1] for s in species_n_sites_list]
 
-    f_mean_mapgd_log10 = numpy.log10(f_mean_mapgd)
-    f_mean_mapgd_log10_rescaled = (f_mean_mapgd_log10 - numpy.mean(f_mean_mapgd_log10)) / numpy.std(f_mean_mapgd_log10)
-    hist_f_mean, bin_edges_f_mean = numpy.histogram(f_mean_mapgd_log10_rescaled, density=True, bins=20)
-    bins_mean_f_mean = [0.5 * (bin_edges_f_mean[i] + bin_edges_f_mean[i+1]) for i in range(0, len(bin_edges_f_mean)-1 )]
-    bins_mean_f_mean = numpy.asarray(bins_mean_f)
+    species_list_sites_to_plot_pretty = [figure_utils.get_pretty_species_name(s) for s in species_list_sites_to_plot]
+    colors_sites = [species_color_map[s] for s in species_list_hosts_to_plot]
+    ax_n_sites.barh(species_list_sites_to_plot_pretty, n_sites_to_plot, height=0.8, align='center', color=colors_sites)
+    ax_n_sites.set_xlabel('Number of SNVs', fontsize=11)
+    ax_n_sites.xaxis.set_tick_params(labelsize=8)
+    ax_n_sites.yaxis.set_tick_params(labelsize=7)
+    ax_n_sites.set_ylim([-0.6, len(species_list_sites_to_plot_pretty)-0.3])
+    ax_n_sites.set_xscale('log', basex =10)
 
-    hist_f_mean_to_plot = hist_f_mean[hist_f_mean>0]
-    bins_mean_f_mean_to_plot = bins_mean_f_mean[hist_f_mean>0]
 
-    ax_f_mean.scatter(bins_mean_f_mean_to_plot, hist_f_mean_to_plot, alpha=0.9, s=10, c=species_color_map[species_name])
+    # plot everything else
 
-    #observed_prevalence_mapgd_no_zeros = observed_prevalence_mapgd[observed_prevalence_mapgd>0]
-    #observed_prevalence_mapgd_log10 = numpy.log10(observed_prevalence_mapgd_no_zeros)
-    #observed_prevalence_mapgd_log10_rescaled = (observed_prevalence_mapgd_log10 - numpy.mean(observed_prevalence_mapgd_log10)) / numpy.std(observed_prevalence_mapgd_log10)
-    #hist_observed_prevalence_mapgd, bin_edges_observed_prevalence_mapgd = numpy.histogram(observed_prevalence_mapgd_log10_rescaled, density=True, bins=20)
-    #bins_mean_observed_prevalence_mapgd = [0.5 * (bin_edges_observed_prevalence_mapgd[i] + bin_edges_observed_prevalence_mapgd[i+1]) for i in range(0, len(bin_edges_observed_prevalence_mapgd)-1 )]
-    #ax_f_prevalence.scatter(bins_mean_observed_prevalence_mapgd, hist_observed_prevalence_mapgd, alpha=0.9, s=10, c=species_color_map[species_name])
+    means_all = []
+    variances_all = []
+    prevalence_all = []
+    n_non_zero_f_all = []
+    means_all_for_prevalence = []
+    species_list_to_plot_good = []
 
+    min_all = []
+    for species_name in species_list_sites_to_plot:
 
-    # taylors law
-    ax_f_mean_vs_var.scatter(f_mean_mapgd_to_plot, f_var_mapgd_to_plot, alpha=1, s=12, c=species_color_map[species_name])
-    means_all.extend(f_mean_mapgd_to_plot.tolist())
-    variances_all.extend(f_var_mapgd_to_plot.tolist())
+        f_no_zeros_mapgd_dict = get_f_no_zeros_dict(species_name)
+        f_no_zeros_mapgd = f_no_zeros_mapgd_dict[variant_type]
+        f_no_zeros_mapgd = numpy.asarray(f_no_zeros_mapgd)
 
-    set_n_non_zero_f = list(set(n_non_zero_f))
-    set_n_non_zero_f.sort()
+        min_all.append(min(f_no_zeros_mapgd))
 
-    prob_prevalence = [sum(n_non_zero_f==n)/len(n_non_zero_f) for n in set_n_non_zero_f]
+        n_non_zero_f = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['n_non_zero_frequencies']
+        n_non_zero_f = numpy.asarray(n_non_zero_f)
 
-    #ax_f_prevalence.plot(set_n_non_zero_f, prob_prevalence, lw=2, ls='-', marker='o', c=species_color_map[species_name], alpha=0.9)
+        f_mean_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_mean_mapgd']
+        f_mean_mapgd = numpy.asarray(f_mean_mapgd)
 
-    f_max_all.extend(f_max_mapgd.tolist())
-    prevalence_all.extend(observed_prevalence_mapgd.tolist())
-    n_non_zero_f_all.extend(n_non_zero_f.tolist())
+        f_var_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_var_mapgd']
+        f_var_mapgd = numpy.asarray(f_var_mapgd)
 
-    # fmax occupancy
-    # plot mean?
-    #for i in set(n_non_zero_f):
-    #    ax_f_max_vs_prevalence.scatter(numpy.mean(f_max_mapgd[n_non_zero_f==i]), i, alpha=0.8, s=10, c=species_color_map[species_name])
+        observed_prevalence_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['observed_prevalence_mapgd_slm']
+        observed_prevalence_mapgd = numpy.asarray(observed_prevalence_mapgd)
 
-    idx_to_plot = numpy.random.choice(len(f_max_mapgd), size=min([len(f_max_mapgd), 1000]), replace=False)
-    f_max_mapgd_to_plot = f_max_mapgd[idx_to_plot]
-    n_non_zero_f_to_plot = n_non_zero_f[idx_to_plot]
-    ax_f_max_vs_prevalence.scatter(f_max_mapgd_to_plot, n_non_zero_f_to_plot, alpha=0.2, s=10, c=species_color_map[species_name])
-    #print(figure_utils.get_pretty_species_name(species_name), len(f_max_mapgd))
+        if len(f_no_zeros_mapgd) == 0:
+            continue
 
-    species_list_to_plot_good.append(species_name)
+        f_mean_mapgd_to_plot = f_mean_mapgd[observed_prevalence_mapgd >= min_prevalence]
+        f_var_mapgd_to_plot = f_var_mapgd[observed_prevalence_mapgd >= min_prevalence]
 
+        f_no_zeros_mapgd_log10 = numpy.log10(f_no_zeros_mapgd)
+        f_no_zeros_mapgd_log10_rescaled = (f_no_zeros_mapgd_log10 - numpy.mean(f_no_zeros_mapgd_log10)) / numpy.std(f_no_zeros_mapgd_log10)
+        hist_f, bin_edges_f = numpy.histogram(f_no_zeros_mapgd_log10_rescaled, density=True, bins=20)
+        bins_mean_f = [0.5 * (bin_edges_f[i] + bin_edges_f[i+1]) for i in range(0, len(bin_edges_f)-1 )]
+        bins_mean_f = numpy.asarray(bins_mean_f)
+        hist_f_to_plot = hist_f[hist_f>0]
+        bins_mean_f_to_plot = bins_mean_f[hist_f>0]
 
+        ax_f.scatter(bins_mean_f_to_plot, hist_f_to_plot, alpha=0.9, s=10, c=species_color_map[species_name])
+        # label=figure_utils.get_pretty_species_name(species_name)
 
-x_range = numpy.linspace(-4, 3, 10000)
 
-k = 2.0
-k_digamma = special.digamma(k)
-k_trigamma = special.polygamma(1,k)
-gammalog = k*k_trigamma*x_range - numpy.exp(numpy.sqrt(k_trigamma)*x_range + k_digamma) - numpy.log(special.gamma(k)) + k*k_digamma + numpy.log10(numpy.exp(1))
+        f_mean_mapgd_log10 = numpy.log10(f_mean_mapgd)
+        f_mean_mapgd_log10_rescaled = (f_mean_mapgd_log10 - numpy.mean(f_mean_mapgd_log10)) / numpy.std(f_mean_mapgd_log10)
+        hist_f_mean, bin_edges_f_mean = numpy.histogram(f_mean_mapgd_log10_rescaled, density=True, bins=20)
+        bins_mean_f_mean = [0.5 * (bin_edges_f_mean[i] + bin_edges_f_mean[i+1]) for i in range(0, len(bin_edges_f_mean)-1 )]
+        bins_mean_f_mean = numpy.asarray(bins_mean_f)
 
+        hist_f_mean_to_plot = hist_f_mean[hist_f_mean>0]
+        bins_mean_f_mean_to_plot = bins_mean_f_mean[hist_f_mean>0]
 
-ax_f.plot(x_range, 10**gammalog, 'k', label='Gamma', lw=2)
+        ax_f_mean.scatter(bins_mean_f_mean_to_plot, hist_f_mean_to_plot, alpha=0.9, s=10, c=species_color_map[species_name])
 
+        observed_prevalence_mapgd_no_zeros = observed_prevalence_mapgd[observed_prevalence_mapgd>0]
+        observed_prevalence_mapgd_log10 = numpy.log10(observed_prevalence_mapgd_no_zeros)
+        observed_prevalence_mapgd_log10_rescaled = (observed_prevalence_mapgd_log10 - numpy.mean(observed_prevalence_mapgd_log10)) / numpy.std(observed_prevalence_mapgd_log10)
+        hist_observed_prevalence_mapgd, bin_edges_observed_prevalence_mapgd = numpy.histogram(observed_prevalence_mapgd_log10_rescaled, density=True, bins=20)
+        bins_mean_observed_prevalence_mapgd = [0.5 * (bin_edges_observed_prevalence_mapgd[i] + bin_edges_observed_prevalence_mapgd[i+1]) for i in range(0, len(bin_edges_observed_prevalence_mapgd)-1 )]
+        #ax_f_prevalence.scatter(bins_mean_observed_prevalence_mapgd, hist_observed_prevalence_mapgd, alpha=0.9, s=10, c=species_color_map[species_name])
 
-ax_f.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' SNV frequencies', fontsize=11)
-ax_f.set_ylabel('Probability density', fontsize=12)
-#ax_f.set_ylim([-0.02, 1.23])
-ax_f.set_ylim([0.007, 1.04])
 
-ax_f.set_yscale('log', basey=10)
-ax_f.legend(loc='upper left', fontsize=11)
+        # taylors law
 
+        #f_mean_mapgd_to_plot_test = f_mean_mapgd_to_plot[f_mean_mapgd_to_plot < 0.35]
+        #f_var_mapgd_to_plot_test = f_var_mapgd_to_plot[f_mean_mapgd_to_plot < 0.35]
 
-ax_f_mean.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' mean\nSNV frequency across hosts', fontsize=11)
-ax_f_mean.set_ylabel('Probability density', fontsize=12)
-#ax_f_mean.set_ylim([-0.02, 0.9])
-ax_f_mean.set_yscale('log', basey=10)
+        ax_f_mean_vs_var.scatter(f_mean_mapgd_to_plot, f_var_mapgd_to_plot, alpha=1, s=12, c=species_color_map[species_name])
+        means_all.extend(f_mean_mapgd_to_plot.tolist())
+        variances_all.extend(f_var_mapgd_to_plot.tolist())
 
+        set_n_non_zero_f = list(set(n_non_zero_f))
+        set_n_non_zero_f.sort()
 
+        #max_n_to_plot = []
+        #prob_prevalence_to_plot = []
+        survival_array = [sum(n_non_zero_f>=i)/len(n_non_zero_f) for i in max_n_occurances_range]
+        #for n_i in max_n_occurances_range:
+        #
+        #    if sum(n_non_zero_f==n_i) == 0:
+        #        continue
 
-if len(means_all) > 0:
+        #    max_n_to_plot.append(n_i)
+        #    prob_prevalence_to_plot.append(sum(n_non_zero_f==n_i)/len(n_non_zero_f))
 
-    means_all = numpy.asarray(means_all)
-    variances_all = numpy.asarray(variances_all)
+        #ax_f_prevalence.plot(max_n_to_plot, prob_prevalence_to_plot, lw=2, ls='-', marker='o', c=species_color_map[species_name], alpha=0.9)
+        #ax_f_prevalence.plot(max_n_occurances_range, survival_array, lw=2, ls='-', marker='o', c=species_color_map[species_name], alpha=0.9)
+        ax_f_prevalence.plot(max_n_occurances_range, survival_array, lw=2, ls='-', alpha=0.8, c=species_color_map[species_name])
 
-    means_log10_all = numpy.log10(means_all)
-    variances_log10_all = numpy.log10(variances_all)
+        #prevalence_range = numpy.logspace(-3, 0, num=1000, endpoint=True)
+        #survival_array = [sum(observed_prevalence_mapgd>=i)/len(observed_prevalence_mapgd) for i in prevalence_range]
+        #survival_array = numpy.asarray(survival_array)
+        #ax_f_prevalence.plot(prevalence_range, survival_array, lw=2, ls='-', c=species_color_map[species_name], alpha=0.5)
 
-    means_log10_all_test = means_log10_all[means_log10_all > numpy.log10(4*(10**-2))]
-    variances_log10_all_test = variances_log10_all[means_log10_all > numpy.log10(4*(10**-2))]
 
-    if len(means_log10_all_test) > 0:
+        species_list_to_plot_good.append(species_name)
 
-        slope, intercept, r_value, p_value, std_err = stats.linregress(means_log10_all_test, variances_log10_all_test)
-        print(slope, intercept)
 
-        #x_log10_range =  numpy.linspace(min(means_log10_all) , max(means_log10_all) , 10000)
-        x_log10_range =  numpy.linspace(min(means_log10_all) , max(means_log10_all) , 10000)
-        y_log10_fit_range = (slope*x_log10_range + intercept)
-        ax_f_mean_vs_var.plot(10**x_log10_range, 10**y_log10_fit_range, c='k', lw=2.5, linestyle='--', zorder=2, label=r'$\sigma^{{2}}_{{f}} \sim \bar{{f}}\,^{{{}}}$'.format(round(slope, 1)))
+    ax_f.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' SNV frequency', fontsize=11)
+    ax_f.set_ylabel('Probability density', fontsize=12)
+    #ax_f.set_ylim([-0.02, 1.23])
+    ax_f.set_ylim([0.007, 1.04])
+    ax_f.set_yscale('log', basey=10)
+    ax_f.legend(loc='upper left', fontsize=11)
+    ax_f.xaxis.set_tick_params(labelsize=8)
+    ax_f.yaxis.set_tick_params(labelsize=8)
 
-        #ax_f_mean_vs_var.legend(loc='upper left', fontsize=11)
+    ax_f_mean.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' mean\nSNV frequency across hosts', fontsize=11)
+    ax_f_mean.set_ylabel('Probability density', fontsize=12)
+    #ax_f_mean.set_ylim([-0.02, 0.9])
+    ax_f_mean.set_yscale('log', basey=10)
+    ax_f_mean.xaxis.set_tick_params(labelsize=8)
+    ax_f_mean.yaxis.set_tick_params(labelsize=8)
 
 
 
+    if len(means_all) > 0:
 
+        means_all = numpy.asarray(means_all)
+        variances_all = numpy.asarray(variances_all)
 
-#ax_f_prevalence.set_xlabel('Number of hosts where SNV is present', fontsize=12)
-#ax_f_prevalence.set_xlabel('SNV prevalence across hosts, ' + r'$\bar{f}$', fontsize=11)
-#ax_f_prevalence.set_ylabel('Fraction of SNVs , ' + r'$\sigma^{2}_{f}$', fontsize=11)
-#ax_f_prevalence.set_ylabel('Fraction of SNVs', fontsize=12)
+        means_log10_all = numpy.log10(means_all)
+        variances_log10_all = numpy.log10(variances_all)
 
-#ax_f_mean_vs_var.set_xlim([0.02, 0.3])
-#ax_f_mean_vs_var.set_ylim([0.01, 0.2])
+        means_log10_all_test = means_log10_all[(means_log10_all > numpy.log10(4*(10**-2))) & (means_log10_all <= numpy.log10(f_mean_upper_cutoff_taylor)) ]
+        variances_log10_all_test = variances_log10_all[(means_log10_all > numpy.log10(4*(10**-2))) & (means_log10_all <= numpy.log10(f_mean_upper_cutoff_taylor))]
 
-#ax_f_mean_vs_var.set_xlim([0.007, 0.35])
-#ax_f_mean_vs_var.set_ylim([0.0004, 0.2])
+        if len(means_log10_all_test) > 0:
 
-#ax_f_prevalence.set_xscale('log', basex=10)
-#ax_f_prevalence.set_yscale('log', basey=10)
+            slope, intercept, r_value, p_value, std_err = stats.linregress(means_log10_all_test, variances_log10_all_test)
+            print(slope, intercept)
 
-ax_f_mean_vs_var.set_xscale('log', basex=10)
-ax_f_mean_vs_var.set_yscale('log', basey=10)
+            # gamma AFD
+            x_range = numpy.linspace(-4, 3, 10000)
+            #k = 2.0
+            k = slope
+            k_digamma = special.digamma(k)
+            k_trigamma = special.polygamma(1,k)
+            gammalog = k*k_trigamma*x_range - numpy.exp(numpy.sqrt(k_trigamma)*x_range + k_digamma) - numpy.log(special.gamma(k)) + k*k_digamma + numpy.log10(numpy.exp(1))
+            ax_f.plot(x_range, 10**gammalog, 'k', label='Gamma', lw=2)
 
-ax_f_mean_vs_var.set_xlabel('Mean SNV frequency across hosts', fontsize=12)
-ax_f_mean_vs_var.set_ylabel('Variance of SNV frequency across hosts', fontsize=11)
 
-#if clade_type == 'all':
-#    ax_f_prevalence.set_xlim([0.9, 32])
-#else:
-#    ax_f_prevalence.set_xlim([0.9, 16])
-#ax_f_mean_vs_var.xaxis.set_tick_params(labelsize=5)
 
+            #x_log10_range =  numpy.linspace(min(means_log10_all) , max(means_log10_all) , 10000)
+            x_log10_range =  numpy.linspace(min(means_log10_all_test) , max(means_log10_all_test) , 10000)
+            y_log10_fit_range = (slope*x_log10_range + intercept)
+            ax_f_mean_vs_var.plot(10**x_log10_range, 10**y_log10_fit_range, c='k', lw=2.5, linestyle='--', zorder=2, label=r'$\sigma^{{2}}_{{f}} \sim \bar{{f}}\,^{{{}}}$'.format(round(slope, 2)))
 
+            ax_f_mean_vs_var.legend(loc='upper left', fontsize=11)
 
 
-# relationship between f_max and prevalence
-f_max_log10_all = numpy.log10(f_max_all)
-n_non_zero_f_all = numpy.asarray(n_non_zero_f_all)
-#prevalence_log10_all = numpy.log10(prevalence_all)
-hist, bin_edges = numpy.histogram(f_max_log10_all, density=True, bins=40)
-bins_mean = [0.5 * (bin_edges[i] + bin_edges[i+1]) for i in range(0, len(bin_edges)-1 )]
+    ax_f_mean_vs_var.set_xscale('log', basex=10)
+    ax_f_mean_vs_var.set_yscale('log', basey=10)
 
-f_max_log10_bins = []
-#prevalence_log10_bins = []
-prevalence_bins = []
-n_non_zero_f_bins = []
-for i in range(0, len(bin_edges)-1):
-    idx_i = (f_max_log10_all > bin_edges[i]) & (f_max_log10_all <= bin_edges[i+1])
-    f_max_log10_bins.append(numpy.mean(f_max_log10_all[idx_i]))
-    n_non_zero_f_bins.append(numpy.mean(n_non_zero_f_all[idx_i]))
-    #prevalence_log10_bins.append(numpy.median(prevalence_log10_all[idx_i]))
+    ax_f_mean_vs_var.set_xlabel('Mean SNV frequency across hosts, ' + r'$\bar{f}$', fontsize=11)
+    ax_f_mean_vs_var.set_ylabel('Variance of SNV frequencies across hosts, ' + r'$\sigma^{2}$', fontsize=10)
+    ax_f_mean_vs_var.xaxis.set_tick_params(labelsize=8)
+    ax_f_mean_vs_var.yaxis.set_tick_params(labelsize=8)
 
-f_max_bins = 10**numpy.asarray(f_max_log10_bins)
-#prevalence_bins = 10**numpy.asarray(prevalence_log10_bins)
 
-ax_f_max_vs_prevalence.plot(f_max_bins, n_non_zero_f_bins, c='k', lw = 3, ls ='--', label = 'Mean across species', zorder=2)
-ax_f_max_vs_prevalence.set_xlabel('Max. SNV frequency within a host, ' + r'$f_{max}$', fontsize=11)
-ax_f_max_vs_prevalence.set_ylabel('Number of hosts where SNV is present', fontsize=11)
-ax_f_max_vs_prevalence.set_xscale('log', basex=10)
-#ax_f_max_vs_prevalence.set_yscale('log', basey=10)
-ax_f_max_vs_prevalence.set_xlim([min(f_max_all)*0.8, max(f_max_all)*1.1])
-#ax_f_max_vs_prevalence.set_ylim([min(prevalence_all)*0.8, max(prevalence_all)*1.1])
-ax_f_max_vs_prevalence.set_ylim([0.9, max_n_occurances+0.1])
+    ax_f_prevalence.set_xlabel('Number of hosts where SNV is present (' + r'$f>0$' + ')', fontsize=11)
+    ax_f_prevalence.set_ylabel('Fraction of SNVs', fontsize=11)
+    ax_f_prevalence.xaxis.set_tick_params(labelsize=8)
+    ax_f_prevalence.yaxis.set_tick_params(labelsize=8)
+    #ax_f_prevalence.set_xscale('log', basex=10)
+    #ax_f_prevalence.set_yscale('log', basey=10)
+    #ax_f_prevalence.set_ylim([-0.02, 1.02])
 
 
-#ax_f_mean_vs_var.legend(loc='upper left', fontsize=10)
-ax_f_max_vs_prevalence.legend(loc='upper left', fontsize=10)
+    fig.tight_layout()
+    fig.subplots_adjust(wspace=0.22, hspace=0.28)
+    fig.savefig("%sdiversity_summary_%s.png" % (config.analysis_directory, variant_type), format='png', bbox_inches = "tight", pad_inches = 0.2, dpi = 600)
+    plt.close()
 
 
-#ax_f.legend(loc='upper left', fontsize=10)
 
-#ax_f.legend(loc='upper left', bbox_to_anchor = (-1.9, 0.55), fontsize=10)
-species_list_to_plot_good.sort()
-legend_elements_all = []
-for species_name in species_list_to_plot_good:
-    legend_elements_all.append(Line2D([0], [0], color = 'none', marker='o', markerfacecolor=species_color_map[species_name], markeredgecolor='none', label=figure_utils.get_pretty_species_name(species_name),  markersize=10.5 ))
-#leg = plt.legend([circle, club],["circle", "club"], loc = "center left", bbox_to_anchor = (1, 0.5), numpoints = 1)
-leg = plt.legend(handles=legend_elements_all,  bbox_to_anchor=(1, 1.85))#, numpoints = 1)
+if __name__=='__main__':
 
+    for variant_type in ['4D', '1D']:
 
-#legend_elements = []
-
-# make the legend with species_list_to_plot
-
-
-
-#ax_f_mean_vs_var.legend(loc='upper left', fontsize=10)
-#ax_f_max_vs_prevalence.legend(loc='upper left', fontsize=10)
-
-# all the legends
-
-#legend_elements = [Line2D([0], [0], color = 'none', marker='o', markerfacecolor='darkgrey', markeredgecolor='none', label="Species",  markersize=8)]
-# Create the figure
-#markerfacecolor='darkgrey',
-#handles_ax_f, labels_ax_f = ax_f.get_legend_handles_labels()
-
-#ax_f.legend(handles=legend_elements, loc='upper left')
-
-#ax_f_mean.legend(handles=legend_elements, loc='upper left')
-
-
-# where some data has already been plotted to ax
-#handles_ax_f_mean_vs_var, labels_ax_f_mean_vs_var = ax_f_mean_vs_var.get_legend_handles_labels()
-# handles is a list, so append manual patch
-#handles_ax_f_mean_vs_var.extend(legend_elements)
-#ax_f_mean_vs_var.legend(handles=handles_ax_f_mean_vs_var, loc='upper left')
-
-
-#handles_ax_f_max_vs_prevalence, labels_ax_f_max_vs_prevalence = ax_f_max_vs_prevalence.get_legend_handles_labels()
-#handles_ax_f_max_vs_prevalence.extend(legend_elements)
-#ax_f_max_vs_prevalence.legend(handles=handles_ax_f_max_vs_prevalence, loc='upper left')
-
-
-
-
-fig.tight_layout()
-fig.subplots_adjust(wspace=0.22, hspace=0.25)
-fig.savefig("%sdiversity_summary_%s_%s.png" % (config.analysis_directory, clade_type, variant_type), format='png', bbox_extra_artists=(leg,), bbox_inches = "tight", pad_inches = 0.2, dpi = 600)
-plt.close()
+        make_plot(variant_type)

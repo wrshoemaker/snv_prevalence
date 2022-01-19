@@ -10,6 +10,7 @@ import numpy
 import gzip
 import pickle
 import bz2
+import calculate_predicted_prevalence_mapgd
 
 from scipy import stats
 from scipy.stats import t
@@ -20,6 +21,8 @@ import matplotlib.cm as cm
 conf=0.95
 
 
+
+
 sub_plot_labels = ['a','b','c', 'd','e','f', 'g','h','i']
 
 good_species = 'Eubacterium_rectale_56927'
@@ -27,6 +30,88 @@ bad_species = 'Bacteroides_vulgatus_57955'
 
 good_bad_color_dict = {good_species: 'dodgerblue', bad_species: '#FF6347'}
 good_bad_color_map_dict = {good_species: cm.Blues, bad_species: cm.Reds}
+
+variant_color_dict = {'4D': 'dodgerblue', '1D': '#FF6347'}
+
+variant_cmap_dict = {'4D': 'Blues', '1D': 'Reds'}
+
+
+
+
+
+
+species_to_run = ['Alistipes_finegoldii_56071', 'Alistipes_onderdonkii_55464', 'Alistipes_putredinis_61533',
+                    'Alistipes_shahii_62199', 'Bacteroidales_bacterium_58650', 'Bacteroides_caccae_53434',
+                    'Bacteroides_cellulosilyticus_58046', 'Bacteroides_fragilis_54507', 'Bacteroides_ovatus_58035',
+                    'Bacteroides_stercoris_56735', 'Bacteroides_thetaiotaomicron_56941', 'Bacteroides_uniformis_57318',
+                    'Bacteroides_vulgatus_57955', 'Bacteroides_xylanisolvens_57185', 'Barnesiella_intestinihominis_62208',
+                    'Dialister_invisus_61905', 'Eubacterium_rectale_56927', 'Oscillibacter_sp_60799', 'Parabacteroides_distasonis_56985',
+                    'Parabacteroides_merdae_56972', 'Ruminococcus_bicirculans_59300', 'Ruminococcus_bromii_62047']
+
+
+
+
+def get_relative_richness_dict(variant_type='4D'):
+
+    max_richness = 4
+    richness_range = list(range(1, max_richness+1))
+
+    good_species_list = calculate_predicted_prevalence_mapgd.good_species_list
+
+    relative_richness_dict = {}
+
+    number_samples_dict = {}
+
+    intermediate_strain_filename_template = config.data_directory+"strain_data/%s.pkl"
+
+    for species_name in good_species_list:
+
+        pi_dict = calculate_predicted_prevalence_mapgd.load_pi_dict(species_name)
+
+        samples = list(pi_dict[variant_type].keys())
+
+        number_samples_dict[species_name] = len(samples)
+
+        richness_all = []
+
+        for sample in samples:
+
+            intermediate_strain_filename = intermediate_strain_filename_template % sample
+
+            if os.path.isfile(intermediate_strain_filename) == False:
+                continue
+
+            with open(intermediate_strain_filename, 'rb') as handle:
+                b = pickle.load(handle)
+
+            if species_name in b:
+
+                abundances = b[species_name]
+                richness_all.append(len(abundances))
+
+
+        relative_richness_dict[species_name] = {}
+
+        for richness_i_idx, richness_i in enumerate(richness_range):
+
+            relative_richness_dict[species_name][richness_i] = richness_all.count(richness_i)/len(richness_all)
+
+
+    relative_richness_1 = [relative_richness_dict[s][1] for s in good_species_list]
+    good_species_list_sorted = [s[0] for s in sorted(zip(good_species_list, relative_richness_1), key = lambda t: t[1])]#[::-1]
+    proprtion_richness = [[],[],[],[]]
+
+    for species_name in good_species_list_sorted:
+
+        for richness_i_idx, richness_i in enumerate(richness_range):
+
+            proprtion_richness[richness_i_idx].append(relative_richness_dict[species_name][richness_i])
+
+
+    return relative_richness_dict, number_samples_dict, proprtion_richness
+
+
+
 
 
 

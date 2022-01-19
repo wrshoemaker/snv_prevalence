@@ -11,6 +11,7 @@ import os.path
 import diversity_utils
 import figure_utils
 import parse_midas_data
+import prevalence_utils
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
@@ -23,25 +24,16 @@ import calculate_predicted_prevalence_mapgd
 data_directory = config.data_directory
 allowed_variant_types = set(['1D','4D'])
 
-#clade_types = ['all','largest_clade', 'no_strains']
-
-clade_type = 'no_strains'
-
-#prevalence_dict = calculate_predicted_prevalence_mapgd.load_predicted_prevalence_subsample_dict()
 prevalence_dict_mapgd = calculate_predicted_prevalence_mapgd.load_predicted_prevalence_dict_all()
-
 
 species_list = list(prevalence_dict_mapgd.keys())
 species_list.sort()
-
 n_species_row=5
-
 nested_species_list = [species_list[x:x+n_species_row] for x in range(0, len(species_list), n_species_row)]
 
 clade_type = 'all'
 #clade_type = 'all'
 pi_type = 'pi_include_boundary'
-variant_type = '4D'
 max_n_occurances = 7
 
 
@@ -56,98 +48,76 @@ for column_idx, column in enumerate(nested_species_list):
 
         ax = fig.add_subplot(gs[column_idx, row_idx])
 
-        predicted_prevalence = prevalence_dict_mapgd[row][clade_type][pi_type][variant_type]['predicted_prevalence_mapgd_slm']
-        predicted_prevalence = numpy.asarray(predicted_prevalence)
+        for variant_type in allowed_variant_types:
 
-        observed_prevalence = prevalence_dict_mapgd[row][clade_type][pi_type][variant_type]['observed_prevalence_mapgd_slm']
-        observed_prevalence = numpy.asarray(observed_prevalence)
+            predicted_prevalence = prevalence_dict_mapgd[row][clade_type][pi_type][variant_type]['predicted_prevalence_mapgd_slm']
+            predicted_prevalence = numpy.asarray(predicted_prevalence)
 
-        predicted_prevalence_no_zeros = predicted_prevalence[(observed_prevalence>0) & (predicted_prevalence>0) ]
-        observed_prevalence_no_zeros = observed_prevalence[(observed_prevalence>0) & (predicted_prevalence>0) ]
+            observed_prevalence = prevalence_dict_mapgd[row][clade_type][pi_type][variant_type]['observed_prevalence_mapgd_slm']
+            observed_prevalence = numpy.asarray(observed_prevalence)
 
-        #f_max_no_zeros = f_max[(observed_prevalence>0) & (predicted_prevalence>0)]
-        if len(observed_prevalence_no_zeros) == 0:
-            continue
+            predicted_prevalence_no_zeros = predicted_prevalence[(observed_prevalence>0) & (predicted_prevalence>0) ]
+            observed_prevalence_no_zeros = observed_prevalence[(observed_prevalence>0) & (predicted_prevalence>0) ]
 
-        all_ = numpy.concatenate([predicted_prevalence_no_zeros,observed_prevalence_no_zeros])
-
-        #re = numpy.absolute(observed_prevalence_no_zeros - predicted_prevalence_no_zeros) / observed_prevalence_no_zeros
-        #re_all = numpy.absolute(observed_prevalence_all_no_zeros - predicted_prevalence_all_no_zeros) / observed_prevalence_all_no_zeros
-
-        #mre = numpy.mean(re)
-        #mre_all = numpy.mean(re_all)
-
-        #print(clade_type, numpy.mean(re - mre_all))
-
-
-        relative_error = numpy.absolute(observed_prevalence_no_zeros - predicted_prevalence_no_zeros) / observed_prevalence_no_zeros
-
-        observed_prevalence_no_zeros_log10 = numpy.log10(observed_prevalence_no_zeros)
-        hist_all, bin_edges_all = numpy.histogram(observed_prevalence_no_zeros_log10, density=True, bins=20)
-        bins_mean_all = [0.5 * (bin_edges_all[i] + bin_edges_all[i+1]) for i in range(0, len(bin_edges_all)-1 )]
-        #print(len(final_state_all))
-        bins_mean_all_to_keep = []
-        relative_error_mean_bins = []
-        for i in range(0, len(bin_edges_all)-1 ):
-            relative_error_i = relative_error[ (observed_prevalence_no_zeros_log10>=bin_edges_all[i]) & (observed_prevalence_no_zeros_log10<bin_edges_all[i+1])]
-            if len(relative_error_i) < 10:
+            #f_max_no_zeros = f_max[(observed_prevalence>0) & (predicted_prevalence>0)]
+            if len(observed_prevalence_no_zeros) == 0:
                 continue
-            bins_mean_all_to_keep.append(bins_mean_all[i])
-            relative_error_mean_bins.append(numpy.mean(relative_error_i))
 
-        bins_mean_all_to_keep = numpy.asarray(bins_mean_all_to_keep)
-        relative_error_mean_bins = numpy.asarray(relative_error_mean_bins)
+            all_ = numpy.concatenate([predicted_prevalence_no_zeros,observed_prevalence_no_zeros])
 
+            #re = numpy.absolute(observed_prevalence_no_zeros - predicted_prevalence_no_zeros) / observed_prevalence_no_zeros
+            #re_all = numpy.absolute(observed_prevalence_all_no_zeros - predicted_prevalence_all_no_zeros) / observed_prevalence_all_no_zeros
 
+            relative_error = numpy.absolute(observed_prevalence_no_zeros - predicted_prevalence_no_zeros) / observed_prevalence_no_zeros
 
-        #xy = numpy.vstack([observed_prevalence_no_zeros, relative_error])
-        #z = gaussian_kde(xy)(xy)
-        # Sort the points by density, so that the densest points are plotted last
-        #idx = z.argsort()
-        #x, y, z = observed_prevalence_no_zeros[idx], relative_error[idx], z[idx]
-        #ax.scatter(x, y, c=z, cmap="Blues", s=90, alpha=0.9, edgecolor='', zorder=1)
+            observed_prevalence_no_zeros_log10 = numpy.log10(observed_prevalence_no_zeros)
+            hist_all, bin_edges_all = numpy.histogram(observed_prevalence_no_zeros_log10, density=True, bins=20)
+            bins_mean_all = [0.5 * (bin_edges_all[i] + bin_edges_all[i+1]) for i in range(0, len(bin_edges_all)-1 )]
+            bins_mean_all_to_keep = []
+            relative_error_mean_bins = []
+            for i in range(0, len(bin_edges_all)-1 ):
+                relative_error_i = relative_error[ (observed_prevalence_no_zeros_log10>=bin_edges_all[i]) & (observed_prevalence_no_zeros_log10<bin_edges_all[i+1])]
+                if len(relative_error_i) < 10:
+                    continue
+                bins_mean_all_to_keep.append(bins_mean_all[i])
+                relative_error_mean_bins.append(numpy.mean(relative_error_i))
 
+            bins_mean_all_to_keep = numpy.asarray(bins_mean_all_to_keep)
+            relative_error_mean_bins = numpy.asarray(relative_error_mean_bins)
+            #xy = numpy.vstack([observed_prevalence_no_zeros, relative_error])
+            #z = gaussian_kde(xy)(xy)
+            # Sort the points by density, so that the densest points are plotted last
+            #idx = z.argsort()
+            #x, y, z = observed_prevalence_no_zeros[idx], relative_error[idx], z[idx]
+            #ax.scatter(x, y, c=z, cmap="Blues", s=90, alpha=0.9, edgecolor='', zorder=1)
 
-        ax.scatter(10**bins_mean_all_to_keep, relative_error_mean_bins, c='dodgerblue', s=90, alpha=0.9, edgecolor='', zorder=1)
+            ax.scatter(10**bins_mean_all_to_keep, relative_error_mean_bins, c=prevalence_utils.variant_color_dict[variant_type], s=90, alpha=0.9, edgecolor='', zorder=1)
 
-        max_ = max(all_)*1.1
-        min_ = min(all_)*0.8
+            max_ = max(all_)*1.1
+            min_ = min(all_)*0.8
 
-        #print(min(f_max_no_zeros))
-
-        #ax.plot([min_, max_],[min_, max_], ls='--', lw=2, c='k', zorder=2)
-        ax.set_xlim([min_, max_])
-        ax.set_ylim([0, max(relative_error_mean_bins)])
-
-
-        ax.set_xscale('log', basex=10)
-        #ax.set_yscale('log', basey=10)
-
-        ax.axhline(y=0, color='k', linestyle=':', lw = 3, zorder=1)
-
-        ax.set_title(figure_utils.get_pretty_species_name(row), fontsize=12, fontweight='bold', color='k' )
-
-
-        if (row_idx == 0):
-            ax.set_ylabel('Relative error', fontsize=14)
-
-
-        if column_idx == len(nested_species_list)-1:
-            ax.set_xlabel('Observed SNV prevalence', fontsize=12)
-
-
-        if column_idx == len(nested_species_list)-2:
-
-            if row_idx > len(nested_species_list[-1])-1:
-
-                ax.set_xlabel('Observed SNV prevalence', fontsize=12)
+            #ax.plot([min_, max_],[min_, max_], ls='--', lw=2, c='k', zorder=2)
+            ax.set_xlim([min_, max_])
+            ax.set_ylim([0, max(relative_error_mean_bins)])
+            ax.set_xscale('log', basex=10)
+            #ax.set_yscale('log', basey=10)
+            ax.axhline(y=0, color='k', linestyle=':', lw = 3, zorder=1)
+            ax.set_title(figure_utils.get_pretty_species_name(row), fontsize=14, fontweight='bold', color='k')
 
 
-#mre_all = numpy.asarray(mre_all)
-#print(sum(mre_all < 0.5) / len(mre_all))
+            if (row_idx == 0):
+                ax.set_ylabel('Relative error', fontsize=14)
+
+            if column_idx == len(nested_species_list)-1:
+                ax.set_xlabel('Observed SNV prevalence', fontsize=14)
+
+            if column_idx == len(nested_species_list)-2:
+                if row_idx > len(nested_species_list[-1])-1:
+                    ax.set_xlabel('Observed SNV prevalence', fontsize=14)
+
 
 fig.tight_layout()
 fig.subplots_adjust(hspace=0.2)
 # dpi = 600
-fig.savefig("%sprevalence_vs_error_mapgd_slm_%s_%s_%s.png" % (config.analysis_directory, clade_type, pi_type, variant_type), format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
+fig.savefig("%sprevalence_vs_error_mapgd_slm.png" % (config.analysis_directory), format='png', bbox_inches = "tight", pad_inches = 0.4, dpi = 600)
 plt.close()

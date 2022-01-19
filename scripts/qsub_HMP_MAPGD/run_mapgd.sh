@@ -30,7 +30,7 @@ module load samtools
 species=$1
 
 
-dir=/u/home/w/wrshoema/project-ngarud/HMP_MAPGD/midas_output_bam/${species}/
+dir=/u/home/w/wrshoema/project-ngarud/snv_prevalence/data/midas_output_bam/${species}/
 
 #rm /u/home/w/wrshoema/project-ngarud/HMP_MAPGD/midas_output_bam/${species}/*.pol
 #rm /u/home/w/wrshoema/project-ngarud/HMP_MAPGD/midas_output_bam/${species}/*.idx
@@ -113,4 +113,4 @@ while read acc; do
 
   fi
 
-done </u/project/ngarud/wrshoema/negative_selection_microbiome/scripts/qsub_HMP_MAPGD/samples_species/HMP1-2_samples_final.txt
+done </u/project/ngarud/wrshoema/snv_prevalence/scripts/qsub_HMP_MAPGD/samples_species/HMP1-2_samples_final.txt
