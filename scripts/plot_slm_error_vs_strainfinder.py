@@ -371,7 +371,7 @@ def load_permutation_dict():
 
 
 #make_error_dict()
-make_permutation_dict()
+#make_permutation_dict()
 
 error_n_dict = load_error_dict()
 species_name_all = list(error_n_dict.keys())

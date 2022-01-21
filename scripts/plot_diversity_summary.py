@@ -35,7 +35,7 @@ clade_type = 'all'
 #clade_type = 'all'
 pi_type = 'pi_include_boundary'
 f_mean_upper_cutoff_taylor = 0.35
-max_n_occurances = 20
+max_n_occurances = 10
 max_n_occurances_range = list(range(1, max_n_occurances+1))
 
 
@@ -54,7 +54,6 @@ def get_f_no_zeros_dict(species_name, clade_type='all'):
 def make_plot(variant_type):
 
     fig = plt.figure(figsize = (12, 8)) #
-
 
     ax_n_hosts = plt.subplot2grid((2, 3), (0, 0), colspan=1)
     ax_n_sites = plt.subplot2grid((2, 3), (1, 0), colspan=1)
@@ -94,6 +93,13 @@ def make_plot(variant_type):
     ax_n_hosts.set_ylim([-0.6, len(species_list_hosts_to_plot_pretty)-0.3])
 
 
+
+    sys.stderr.write("%s sites\n" % variant_type)
+
+    sys.stderr.write("Min. # hosts = %d\n" % min(hosts_to_plot))
+    sys.stderr.write("Max. # hosts = %d\n" % max(hosts_to_plot))
+    sys.stderr.write("Median # hosts = %f\n" % numpy.median(hosts_to_plot))
+
     # plot number of snvs
     # sort species names
     species_n_sites_list = []
@@ -117,6 +123,10 @@ def make_plot(variant_type):
     ax_n_sites.yaxis.set_tick_params(labelsize=7)
     ax_n_sites.set_ylim([-0.6, len(species_list_sites_to_plot_pretty)-0.3])
     ax_n_sites.set_xscale('log', basex =10)
+
+    sys.stderr.write("Min. # SNVs = %d\n" % min(n_sites_to_plot))
+    sys.stderr.write("Max. # SNVs = %d\n" % max(n_sites_to_plot))
+    sys.stderr.write("Median # SNVs = %f\n" % 10**numpy.median(numpy.log10(n_sites_to_plot)))
 
 
     # plot everything else
@@ -198,20 +208,19 @@ def make_plot(variant_type):
         set_n_non_zero_f = list(set(n_non_zero_f))
         set_n_non_zero_f.sort()
 
-        #max_n_to_plot = []
-        #prob_prevalence_to_plot = []
-        survival_array = [sum(n_non_zero_f>=i)/len(n_non_zero_f) for i in max_n_occurances_range]
-        #for n_i in max_n_occurances_range:
-        #
-        #    if sum(n_non_zero_f==n_i) == 0:
-        #        continue
+        max_n_to_plot = []
+        prob_prevalence_to_plot = []
+        #survival_array = [sum(n_non_zero_f>=i)/len(n_non_zero_f) for i in max_n_occurances_range]
+        for n_i in max_n_occurances_range:
 
-        #    max_n_to_plot.append(n_i)
-        #    prob_prevalence_to_plot.append(sum(n_non_zero_f==n_i)/len(n_non_zero_f))
+            if sum(n_non_zero_f==n_i) == 0:
+                continue
 
-        #ax_f_prevalence.plot(max_n_to_plot, prob_prevalence_to_plot, lw=2, ls='-', marker='o', c=species_color_map[species_name], alpha=0.9)
-        #ax_f_prevalence.plot(max_n_occurances_range, survival_array, lw=2, ls='-', marker='o', c=species_color_map[species_name], alpha=0.9)
-        ax_f_prevalence.plot(max_n_occurances_range, survival_array, lw=2, ls='-', alpha=0.8, c=species_color_map[species_name])
+            max_n_to_plot.append(n_i)
+            prob_prevalence_to_plot.append(sum(n_non_zero_f==n_i)/len(n_non_zero_f))
+
+        ax_f_prevalence.plot(max_n_to_plot, prob_prevalence_to_plot, lw=2, ls='-', marker='o', c=species_color_map[species_name], alpha=0.9)
+        #ax_f_prevalence.plot(max_n_occurances_range, survival_array, lw=2, ls='-', alpha=0.8, c=species_color_map[species_name])
 
         #prevalence_range = numpy.logspace(-3, 0, num=1000, endpoint=True)
         #survival_array = [sum(observed_prevalence_mapgd>=i)/len(observed_prevalence_mapgd) for i in prevalence_range]
@@ -222,14 +231,6 @@ def make_plot(variant_type):
         species_list_to_plot_good.append(species_name)
 
 
-    ax_f.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' SNV frequency', fontsize=11)
-    ax_f.set_ylabel('Probability density', fontsize=12)
-    #ax_f.set_ylim([-0.02, 1.23])
-    ax_f.set_ylim([0.007, 1.04])
-    ax_f.set_yscale('log', basey=10)
-    ax_f.legend(loc='upper left', fontsize=11)
-    ax_f.xaxis.set_tick_params(labelsize=8)
-    ax_f.yaxis.set_tick_params(labelsize=8)
 
     ax_f_mean.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' mean\nSNV frequency across hosts', fontsize=11)
     ax_f_mean.set_ylabel('Probability density', fontsize=12)
@@ -254,7 +255,7 @@ def make_plot(variant_type):
         if len(means_log10_all_test) > 0:
 
             slope, intercept, r_value, p_value, std_err = stats.linregress(means_log10_all_test, variances_log10_all_test)
-            print(slope, intercept)
+            #print(slope, intercept)
 
             # gamma AFD
             x_range = numpy.linspace(-4, 3, 10000)
@@ -272,16 +273,28 @@ def make_plot(variant_type):
             y_log10_fit_range = (slope*x_log10_range + intercept)
             ax_f_mean_vs_var.plot(10**x_log10_range, 10**y_log10_fit_range, c='k', lw=2.5, linestyle='--', zorder=2, label=r'$\sigma^{{2}}_{{f}} \sim \bar{{f}}\,^{{{}}}$'.format(round(slope, 2)))
 
-            ax_f_mean_vs_var.legend(loc='upper left', fontsize=11)
 
+    ax_f.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' SNV frequency', fontsize=11)
+    ax_f.set_ylabel('Probability density', fontsize=12)
+    #ax_f.set_ylim([-0.02, 1.23])
+    ax_f.set_ylim([0.007, 1.04])
+    ax_f.set_yscale('log', basey=10)
+    ax_f.legend(loc='upper left', fontsize=11)
+    ax_f.xaxis.set_tick_params(labelsize=8)
+    ax_f.yaxis.set_tick_params(labelsize=8)
+
+    # plot inequqlity
+    x_inequality = numpy.logspace(numpy.log10(0.03), 0, num=1000, endpoint=True)
+    y_inequality = (1-x_inequality)*x_inequality
+    ax_f_mean_vs_var.plot(x_inequality, y_inequality, c='k', lw=2.5, linestyle=':', zorder=1, label='Max. ' + r'$\sigma_{f}^{2}$')
 
     ax_f_mean_vs_var.set_xscale('log', basex=10)
     ax_f_mean_vs_var.set_yscale('log', basey=10)
-
     ax_f_mean_vs_var.set_xlabel('Mean SNV frequency across hosts, ' + r'$\bar{f}$', fontsize=11)
-    ax_f_mean_vs_var.set_ylabel('Variance of SNV frequencies across hosts, ' + r'$\sigma^{2}$', fontsize=10)
+    ax_f_mean_vs_var.set_ylabel('Variance of SNV frequencies across hosts, ' + r'$\sigma^{2}_{f}$', fontsize=10)
     ax_f_mean_vs_var.xaxis.set_tick_params(labelsize=8)
     ax_f_mean_vs_var.yaxis.set_tick_params(labelsize=8)
+    ax_f_mean_vs_var.legend(loc='upper left', fontsize=11)
 
 
     ax_f_prevalence.set_xlabel('Number of hosts where SNV is present (' + r'$f>0$' + ')', fontsize=11)
@@ -289,7 +302,7 @@ def make_plot(variant_type):
     ax_f_prevalence.xaxis.set_tick_params(labelsize=8)
     ax_f_prevalence.yaxis.set_tick_params(labelsize=8)
     #ax_f_prevalence.set_xscale('log', basex=10)
-    #ax_f_prevalence.set_yscale('log', basey=10)
+    ax_f_prevalence.set_yscale('log', basey=10)
     #ax_f_prevalence.set_ylim([-0.02, 1.02])
 
 

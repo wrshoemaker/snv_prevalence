@@ -1202,7 +1202,7 @@ def load_predicted_prevalence_dict_all(test=False):
                 clade_type = split[1] + '_' + split[2]
 
             if test == True:
-                if species != 'Bacteroides_ovatus_58035':
+                if species != 'Bacteroides_vulgatus_57955':
                     continue
 
             if species not in prevalence_dict:
