@@ -7,9 +7,12 @@
 python plot_diversity_summary.py
 
 # Fig. 2
-python plot_prevalence_prediction_summary.py
+python plot_prevalence_prediction_example.py
 
 # Fig. 3
+python plot_prevalence_prediction_summary.py
+
+# Fig. 4
 python plot_prevalence_vs_error_mapgd_slm.py
 
 
@@ -32,6 +35,8 @@ python plot_prevalence_error_mapgd.py
 
 
 python plot_f_mean_vs_prevalence.py
+
+python plot_f_max_vs_prevalence.py
 
 
 python plot_prevalence_vs_error_mapgd_slm.py

@@ -108,7 +108,7 @@ def make_plot(variant_type, slm=True):
     fig.tight_layout()
     fig.subplots_adjust(hspace=0.2)
     # dpi = 600
-    fig.savefig("%spredicted_observed_prevalence_mapgd%s_%s.png" % (config.analysis_directory, slm_plot, variant_type), format='png', bbox_inches = "tight", pad_inches = 0.4, dpi=600)
+    fig.savefig("%spredicted_observed_prevalence_mapgd%s_%s.pdf" % (config.analysis_directory, slm_plot, variant_type), format='pdf', bbox_inches = "tight", pad_inches = 0.4, dpi=600)
     plt.close()
 
 

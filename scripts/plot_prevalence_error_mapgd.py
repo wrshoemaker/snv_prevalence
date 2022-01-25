@@ -42,6 +42,9 @@ def make_plot(variant_type):
     gs = gridspec.GridSpec(nrows=len(nested_species_list), ncols=2*n_species_row)
     fig = plt.figure(figsize = (40, 20))
 
+
+    errors_greter_10_percent_all = []
+
     for column_idx, column in enumerate(nested_species_list):
 
         for row_idx, row in enumerate(column):
@@ -75,8 +78,6 @@ def make_plot(variant_type):
 
 
             # fraction of SNVs where estimator improves prediction
-
-
             error_slm_log10 = numpy.log10(error_slm)
             error_log10 = numpy.log10(error)
 
@@ -85,6 +86,8 @@ def make_plot(variant_type):
 
             error_slm_no_nan = 10**error_slm_log10_no_nan
             error_no_nan = 10**error_log10_no_nan
+
+            errors_greter_10_percent_all.append(sum(error_slm_no_nan>=0.1)/len(error_slm_no_nan))
 
             min_x = min([min(error_slm_no_nan), min(error_no_nan)])
             max_x = max([max(error_slm_no_nan), max(error_no_nan)])
@@ -125,13 +128,18 @@ def make_plot(variant_type):
     fig.tight_layout()
     fig.subplots_adjust(hspace=0.2)
     # dpi = 600
-    fig.savefig("%sprevalence_error_mapgd_%s.png" % (config.analysis_directory, variant_type), format='png', bbox_inches = "tight", pad_inches = 0.4, dpi=600)
+    fig.savefig("%sprevalence_error_mapgd_%s.pdf" % (config.analysis_directory, variant_type), format='pdf', bbox_inches = "tight", pad_inches = 0.4, dpi=600)
     plt.close()
+
+
+    print(min(errors_greter_10_percent_all), max(errors_greter_10_percent_all))
 
 
 
 if __name__=='__main__':
 
     for variant_type in ['4D', '1D']:
+
+        print(variant_type)
 
         make_plot(variant_type)

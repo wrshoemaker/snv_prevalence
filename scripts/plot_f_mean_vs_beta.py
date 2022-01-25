@@ -101,7 +101,7 @@ def make_plot(variant_type):
     fig.tight_layout()
     fig.subplots_adjust(hspace=0.2)
     # dpi = 600
-    fig.savefig("%sf_mean_vs_beta_%s.png" % (config.analysis_directory, variant_type), format='png', bbox_inches = "tight", pad_inches = 0.4, dpi=600)
+    fig.savefig("%sf_mean_vs_beta_%s.pdf" % (config.analysis_directory, variant_type), format='pdf', bbox_inches = "tight", pad_inches = 0.4, dpi=600)
     plt.close()
 
 

@@ -217,6 +217,7 @@ idx_ = (numpy.isfinite(error_eco_log10)) & (numpy.isfinite(error_evo_log10))
 error_eco_log10_no_nan = error_eco_log10[idx_]
 error_evo_log10_no_nan = error_evo_log10[idx_]
 
+
 error_eco_no_nan = 10**error_eco_log10_no_nan
 error_evo_no_nan = 10**error_evo_log10_no_nan
 
@@ -231,8 +232,12 @@ survival_error_evo = [sum(error_evo_no_nan >= i)/len(error_evo_no_nan) for i in 
 survival_error_eco = numpy.asarray(survival_error_eco)
 survival_error_evo = numpy.asarray(survival_error_evo)
 
-ax_error.plot(x_range, survival_error_eco, ls='-', lw=2, c=species_color_map[species_name], zorder=2, label='SLM')
-ax_error.plot(x_range, survival_error_evo, ls='--', lw=2, c=species_color_map[species_name], zorder=2, label='Evolutionary Model')
+
+ax_error.axvline(10**numpy.mean(error_eco_log10_no_nan), lw=1.5, ls='--',color='k', zorder=1, label='SLM, ' + r'$\overline{\mathrm{log}_{10} \epsilon}$')
+ax_error.axvline(10**numpy.mean(error_evo_log10_no_nan), lw=1.5, ls=':',color='k', zorder=1, label='Evo model, ' + r'$\overline{\mathrm{log}_{10} \epsilon}$')
+
+ax_error.plot(x_range, survival_error_eco, ls='--', lw=2, c=species_color_map[species_name], zorder=2, label='SLM')
+ax_error.plot(x_range, survival_error_evo, ls=':', lw=2, c=species_color_map[species_name], zorder=2, label='Evo model')
 ax_error.set_xscale('log', basex=10)
 ax_error.legend(loc="lower left", fontsize=8)
 ax_error.set_xlabel('Relative error of prevalence prediction, ' + r'$\epsilon$', fontsize=12)
@@ -259,7 +264,7 @@ ax_error_vs.set_ylim([min_, max_])
 ax_error_vs.set_xscale('log', basex=10)
 ax_error_vs.set_yscale('log', basey=10)
 ax_error_vs.set_xlabel('Relative error, SLM', fontsize=12)
-ax_error_vs.set_ylabel('Relative error, evolutionary model', fontsize=12)
+ax_error_vs.set_ylabel('Relative error, evo model', fontsize=12)
 ax_error_vs.legend(loc="lower right", fontsize=12)
 ax_error_vs.xaxis.set_tick_params(labelsize=8)
 ax_error_vs.yaxis.set_tick_params(labelsize=8)
@@ -270,5 +275,5 @@ ax_error_vs.yaxis.set_tick_params(labelsize=8)
 
 fig.tight_layout()
 fig.subplots_adjust(wspace=0.22, hspace=0.28)
-fig.savefig("%sprevalence_example.png" % config.analysis_directory, format='png', bbox_inches = "tight", pad_inches = 0.2, dpi = 600)
+fig.savefig("%sprevalence_example.pdf" % config.analysis_directory, format='pdf', bbox_inches = "tight", pad_inches = 0.2, dpi = 600)
 plt.close()

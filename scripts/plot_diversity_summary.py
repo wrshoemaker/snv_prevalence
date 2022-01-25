@@ -308,7 +308,7 @@ def make_plot(variant_type):
 
     fig.tight_layout()
     fig.subplots_adjust(wspace=0.22, hspace=0.28)
-    fig.savefig("%sdiversity_summary_%s.png" % (config.analysis_directory, variant_type), format='png', bbox_inches = "tight", pad_inches = 0.2, dpi = 600)
+    fig.savefig("%sdiversity_summary_%s.pdf" % (config.analysis_directory, variant_type), format='pdf', bbox_inches = "tight", pad_inches = 0.2, dpi = 600)
     plt.close()
 
 

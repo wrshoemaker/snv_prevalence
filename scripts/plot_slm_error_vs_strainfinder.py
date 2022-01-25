@@ -30,7 +30,8 @@ import calculate_predicted_prevalence_mapgd
 iter = 100000
 numpy.random.seed(123456789)
 random.seed(123456789)
-min_n_species = 5
+min_n_species = 10
+n_snvs = 10
 
 #species_name = 'Bacteroides_xylanisolvens_57185'
 clade_type = 'all'
@@ -255,6 +256,8 @@ def make_permutation_dict():
 
     rho_dict = {}
     species_samples_prevalence_dict = {}
+    species_fraction_prevalence_dict = {}
+    species_mean_error_all_prevalence_dict = {}
     for min_prevalence_ in min_prevalence_range:
 
         mean_error_all = []
@@ -269,12 +272,13 @@ def make_permutation_dict():
             observed_prevalence_to_keep = observed_prevalence[(observed_prevalence>=min_prevalence_) & (observed_prevalence <= max_prevalence)]
             error_to_keep = error[(observed_prevalence>=min_prevalence_) & (observed_prevalence <= max_prevalence)]
 
-            if len(error_to_keep) < 10:
+            if len(error_to_keep) < n_snvs:
                 continue
 
             mean_error_all.append(numpy.mean(error_to_keep))
             strain_fraction_all.append(error_n_dict[species_name]['fraction_samples_strain'])
             species_all.append(species_name)
+
 
         # at least three observations
         if len(strain_fraction_all) < min_n_species:
@@ -284,9 +288,9 @@ def make_permutation_dict():
         rho = numpy.corrcoef(numpy.log10(mean_error_all), strain_fraction_all)[0,1]
         rho_dict[min_prevalence_] = rho
         species_samples_prevalence_dict[min_prevalence_] = species_all
-
+        species_fraction_prevalence_dict[min_prevalence_] = strain_fraction_all
+        species_mean_error_all_prevalence_dict[min_prevalence_] = mean_error_all
         # add data to dict for permutation
-
         for species_name in species_all:
             error_prevalence_dict_species[species_name].append(min_prevalence_)
 
@@ -348,8 +352,9 @@ def make_permutation_dict():
         permutation_dict[min_prevalence_i]['lower_ci'] = lower_ci
         permutation_dict[min_prevalence_i]['upper_ci'] = upper_ci
         permutation_dict[min_prevalence_i]['species'] = species_samples_prevalence_dict[min_prevalence_i]
+        permutation_dict[min_prevalence_i]['fraction_all'] = species_fraction_prevalence_dict[min_prevalence_i]
+        permutation_dict[min_prevalence_i]['mean_error_all'] = species_mean_error_all_prevalence_dict[min_prevalence_i]
 
-        print(min_prevalence_i, len(species_samples_prevalence_dict[min_prevalence_i]))
 
 
     sys.stderr.write("Saving permutation dict...\n")
@@ -387,7 +392,6 @@ upper_ci = [permutation_dict[n_]['upper_ci'] for n_ in n_to_plot]
 observed = [permutation_dict[n_]['observed'] for n_ in n_to_plot]
 
 
-
 # get examples for regression
 prevalence_error_31 = []
 prevalence_error_1 = []
@@ -395,19 +399,34 @@ fraction_samples_strain_31 = []
 fraction_samples_strain_1 = []
 species_31 = []
 species_1 = []
-for species_name in error_n_dict.keys():
 
-    if 1 in error_n_dict[species_name]['prevalence_error']:
-        prevalence_error_1.append(error_n_dict[species_name]['prevalence_error'][1])
-        fraction_samples_strain_1.append(error_n_dict[species_name]['fraction_samples_strain'])
-        species_1.append(species_name)
+#0.04906656
+# 0.04906656
+#for species_name in error_n_dict.keys():
+
+    #if 1 in error_n_dict[species_name]['prevalence_error']:
+    #    prevalence_error_1.append(error_n_dict[species_name]['prevalence_error'][1])
+    #    fraction_samples_strain_1.append(error_n_dict[species_name]['fraction_samples_strain'])
+    #    species_1.append(species_name)
+
+    #if 31 in error_n_dict[species_name]['prevalence_error']:
+    #    prevalence_error_31.append(error_n_dict[species_name]['prevalence_error'][31])
+    #    fraction_samples_strain_31.append(error_n_dict[species_name]['fraction_samples_strain'])
+    #    species_31.append(species_name)
 
 
-    if 35 in error_n_dict[species_name]['prevalence_error']:
-        prevalence_error_31.append(error_n_dict[species_name]['prevalence_error'][35])
-        fraction_samples_strain_31.append(error_n_dict[species_name]['fraction_samples_strain'])
-        species_31.append(species_name)
 
+
+
+low_prevalence = 0.049066563968316435
+high_prevalence = 0.15573958729018694
+
+prevalence_error_1 = permutation_dict[low_prevalence]['mean_error_all']
+prevalence_error_31 = permutation_dict[high_prevalence]['mean_error_all']
+fraction_samples_strain_1 = permutation_dict[low_prevalence]['fraction_all']
+fraction_samples_strain_31 = permutation_dict[high_prevalence]['fraction_all']
+species_1 = permutation_dict[low_prevalence]['species']
+species_31 = permutation_dict[high_prevalence]['species']
 
 
 
@@ -432,6 +451,7 @@ species_fraction_strains_tuple = species_fraction_strains_tuple[::-1]
 species_to_plot = [s[0] for s in species_fraction_strains_tuple]
 strain_fraction_to_plot = [s[1] for s in species_fraction_strains_tuple]
 
+
 species_to_plot_pretty = [figure_utils.get_pretty_species_name(s) for s in species_to_plot]
 colors_hosts = [species_color_map[s] for s in species_to_plot]
 ax_strain.barh(species_to_plot_pretty, strain_fraction_to_plot, height=0.8, align='center', color=colors_hosts)
@@ -440,23 +460,33 @@ ax_strain.xaxis.set_tick_params(labelsize=8)
 ax_strain.yaxis.set_tick_params(labelsize=9)
 ax_strain.set_ylim([-0.6, len(species_to_plot)-0.3])
 
+strain_fraction_median = numpy.median(strain_fraction_to_plot)
+ax_strain.axvline(x=strain_fraction_median, color='k', linestyle='--', label='Median', lw = 2.5, zorder=2)
+ax_strain.axvline(x=min(strain_fraction_to_plot), color='k', linestyle=':', label='Min. strain prevalence', lw = 2.5, zorder=2)
+ax_strain.legend(loc="upper right", fontsize=7)
+
+
 
 #sorted_samples = [s[1] for s in sorted(zip(good_species_list, number_samples), key = lambda t: t[1])][::-1]
 
-#good_species_list_sorted_samples_pretty = [figure_utils.get_pretty_species_name(s) for s in good_species_list_sorted_samples][::-1]
 
-#error_n_dict[s]['fraction_samples_strain']
+#permutation_dict[min_prevalence_i]['species'] = species_samples_prevalence_dict[min_prevalence_i]
+#permutation_dict[min_prevalence_i]['fraction_all'] = species_fraction_prevalence_dict[min_prevalence_i]
+#permutation_dict[min_prevalence_i]['mean_error_all'] = species_mean_error_all_prevalence_dict[min_prevalence_i]
 
 
 
 
-ax_ex.scatter(-100, -100, color='k', linewidth=2, facecolors='white', s=60, label='SNVs present in one host')
-ax_ex.scatter(-100, -100, color='k', s=60, label='SNVs present in 35 hosts')
-ax_ex.set_xlim([0.05, 0.7])
-ax_ex.set_ylim([0.08, 0.92])
-ax_ex.set_xlabel('Strain prevalence', fontsize=11)
-ax_ex.set_ylabel('Mean relative error of SLM', fontsize=11)
-ax_ex.legend(loc="upper right", fontsize=7)
+
+
+
+for species_1_idx, species_1_ in enumerate(species_1):
+    ax_ex.scatter(fraction_samples_strain_1[species_1_idx], prevalence_error_1[species_1_idx], color=species_color_map[species_1_], linewidth=2, facecolors='white', s=60)
+
+for species_31_idx, species_31_ in enumerate(species_31):
+    ax_ex.scatter(fraction_samples_strain_31[species_31_idx], prevalence_error_31[species_31_idx], color=species_color_map[species_31_], s=60)
+
+
 
 
 
@@ -474,28 +504,54 @@ ax_ex.plot(x_range, y_fit_1, c='k', lw=2.5, linestyle='--', zorder=2)
 ax_ex.plot(x_range, y_fit_31, c='k', lw=2.5, linestyle='-', zorder=2)
 ax_ex.xaxis.set_tick_params(labelsize=8)
 ax_ex.yaxis.set_tick_params(labelsize=8)
-ax_ex.text(0.83,  0.25, r'$\rho_{1} =$' + str( round(r_value_1, 3) ), fontsize=8, color='k', ha='center', va='center', transform=ax_ex.transAxes  )
-ax_ex.text(0.578 , 0.25, r'$P_{1} =$' + str( round(p_value_1, 3) ), fontsize=8, color='k', ha='center', va='center', transform=ax_ex.transAxes  )
-ax_ex.text(0.85, 0.2, r'$\rho_{35} =$' + str(round(r_value_31, 3)), fontsize=8, color='k', ha='center', va='center', transform=ax_ex.transAxes  )
-ax_ex.text(0.6, 0.2, r'$P_{35}=$' + str(round(p_value_31, 4) ), fontsize=8, color='k', ha='center', va='center', transform=ax_ex.transAxes  )
+#ax_ex.text(0.83,  0.25, r'$\rho_{\hat{\varrho}=0.05} =$' + str( round(r_value_1, 3) ), fontsize=8, color='k', ha='center', va='center', transform=ax_ex.transAxes  )
+#ax_ex.text(0.578 , 0.25, r'$P_{1} =$' + str( round(p_value_1, 3) ), fontsize=8, color='k', ha='center', va='center', transform=ax_ex.transAxes  )
+#ax_ex.text(0.85, 0.2, r'$\rho_{\hat{\varrho}=0.15} =$' + str(round(r_value_31, 3)), fontsize=8, color='k', ha='center', va='center', transform=ax_ex.transAxes  )
+#ax_ex.text(0.6, 0.2, r'$P_{35}=$' + str(round(p_value_31, 4) ), fontsize=8, color='k', ha='center', va='center', transform=ax_ex.transAxes  )
+
+
+ax_ex.scatter(-100, -100, color='k', linewidth=2, facecolors='white', s=60, label=r'$\hat{\varrho} \geq 0.05$' + ', ' + r'$\rho=$' +  str(round(r_value_1, 3)) )
+ax_ex.scatter(-100, -100, color='k', s=60, label=r'$\hat{\varrho}  \geq 0.15$' + ', ' + r'$\rho=$' +  str(round(r_value_31, 3)) )
+ax_ex.set_xlim([0.05, 0.7])
+ax_ex.set_ylim([0.08, 0.92])
+ax_ex.set_xlabel('Strain prevalence', fontsize=11)
+ax_ex.set_ylabel('Mean relative error of SLM', fontsize=11)
+ax_ex.legend(loc="upper left", fontsize=7)
+
 
 ax_ex.set_ylim([0.0, 0.95])
 
 #ax_ex.text(0.6,0.2, 'ddf', fontsize=11, color='k', ha='center', va='center', transform=ax_ex.transAxes  )
 
+n_to_plot = numpy.asarray(n_to_plot)
+lower_ci = numpy.asarray(lower_ci)
+upper_ci = numpy.asarray(upper_ci)
+observed = numpy.asarray(observed)
 
-ax_corr.fill_between(n_to_plot, lower_ci, upper_ci, alpha=0.6, color='grey', zorder=1, label='95% CI')
-ax_corr.plot(n_to_plot, lower_ci, color ='k', lw=1.5, zorder=1)
-ax_corr.plot(n_to_plot, upper_ci, color ='k', lw=1.5, zorder=1 )
-ax_corr.plot(n_to_plot, observed, marker="o", color='k', lw=2, label="Observed")
-ax_corr.set_xlim([min(n_to_plot), max(n_to_plot)])
-ax_corr.legend(loc='upper left', fontsize=8)
-ax_corr.set_xlabel('Observed SNV prevalence', fontsize=11)
+
+
+n_to_plot_ = n_to_plot[n_to_plot<=strain_fraction_median]
+lower_ci_ = lower_ci[n_to_plot<=strain_fraction_median]
+upper_ci_ = upper_ci[n_to_plot<=strain_fraction_median]
+observed_ = observed[n_to_plot<=strain_fraction_median]
+
+
+
+ax_corr.fill_between(n_to_plot_, lower_ci_, upper_ci_, alpha=0.6, color='grey', zorder=1, label='95% CI')
+ax_corr.plot(n_to_plot_, lower_ci_, color ='k', lw=1.5, zorder=1)
+ax_corr.plot(n_to_plot_, upper_ci_, color ='k', lw=1.5, zorder=1 )
+ax_corr.plot(n_to_plot_, observed_, marker="o", color='k', lw=2, label="Observed")
+
+x_offset = (max(n_to_plot_)  - min(n_to_plot_)) * 0.01
+ax_corr.set_xlim([min(n_to_plot_), max(n_to_plot_) ])
+ax_corr.set_xlabel('Minimum observed SNV prevalence', fontsize=11)
 ax_corr.set_ylabel('Correlation between\nSLM MRE and strain prevalence', fontsize=11)
-ax_corr.axhline(0, lw=1.5, ls='--',color='k', zorder=1)
+ax_corr.axhline(0, lw=1.5, ls='--',color='k', zorder=1, label='Zero correlation')
 ax_corr.xaxis.set_tick_params(labelsize=8)
 ax_corr.yaxis.set_tick_params(labelsize=6.5)
+ax_corr.axvline(x=min(strain_fraction_to_plot), color='k', linestyle=':', label='Min. strain prevalence', lw = 2.5, zorder=2)
 
+ax_corr.legend(loc='upper right', fontsize=8)
 fig.tight_layout()
 fig.subplots_adjust(hspace=0.1, wspace=0.28)
 fig.savefig("%sslm_error_vs_strainfinder%s.png" % (config.analysis_directory, best_status), format='png', bbox_inches = "tight", pad_inches = 0.4, dpi=600)
