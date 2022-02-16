@@ -33,10 +33,11 @@ python plot_error_evo_vs_slm.py
 
 python plot_prevalence_error_mapgd.py
 
+python python plot_predicted_observed_prevalence_mapgd.py
 
 python plot_f_mean_vs_prevalence.py
 
 python plot_f_max_vs_prevalence.py
 
 
-python plot_prevalence_vs_error_mapgd_slm.py
+#python plot_prevalence_vs_error_mapgd_slm.py

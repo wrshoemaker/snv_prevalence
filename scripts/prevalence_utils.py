@@ -20,7 +20,8 @@ import matplotlib.cm as cm
 
 conf=0.95
 
-
+n_points=1000
+color_radius=2
 
 
 sub_plot_labels = ['a','b','c', 'd','e','f', 'g','h','i']
@@ -208,3 +209,47 @@ def get_confidence_hull(x, y):
 
 
     return x_range, y_range_pred, lcb, ucb
+
+
+
+
+
+# https://github.com/weecology/macroecotools/blob/master/macroecotools/macroecotools.py
+# code to cluster points
+def count_pts_within_radius(x, y, radius, logscale=0):
+    """Count the number of points within a fixed radius in 2D space"""
+    #TODO: see if we can improve performance using KDTree.query_ball_point
+    #http://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.query_ball_point.html
+    #instead of doing the subset based on the circle
+    unique_points = set([(x[i], y[i]) for i in range(len(x))])
+    count_data = []
+    logx, logy, logr = numpy.log10(x), numpy.log10(y), numpy.log10(radius)
+    for a, b in unique_points:
+        if logscale == 1:
+            loga, logb = numpy.log10(a), numpy.log10(b)
+            num_neighbors = len(x[((logx - loga) ** 2 +
+                                   (logy - logb) ** 2) <= logr ** 2])
+        else:
+            num_neighbors = len(x[((x - a) ** 2 + (y - b) ** 2) <= radius ** 2])
+        count_data.append((a, b, num_neighbors))
+    return count_data
+
+
+def plot_color_by_pt_dens(x, y, radius, loglog=0):
+    """Plot bivariate relationships with large n using color for point density
+
+    Inputs:
+    x & y -- variables to be plotted
+    radius -- the linear distance within which to count points as neighbors
+    loglog -- a flag to indicate the use of a loglog plot (loglog = 1)
+
+    The color of each point in the plot is determined by the logarithm (base 10)
+    of the number of points that occur with a given radius of the focal point,
+    with hotter colors indicating more points. The number of neighboring points
+    is determined in linear space regardless of whether a loglog plot is
+    presented.
+    """
+    plot_data = count_pts_within_radius(x, y, radius, loglog)
+    sorted_plot_data = numpy.array(sorted(plot_data, key=lambda point: point[2]))
+
+    return sorted_plot_data

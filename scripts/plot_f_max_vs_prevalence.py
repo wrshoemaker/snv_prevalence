@@ -76,13 +76,25 @@ def make_plot(variant_type):
             bins_mean = numpy.asarray(bins_mean)
             prevalence_predicted_mean = numpy.asarray(prevalence_predicted_mean)
 
-            all_ = numpy.concatenate([f_mean_slm, observed_prevalence_slm])
-            xy = numpy.vstack([f_mean_slm, observed_prevalence_slm])
-            z = gaussian_kde(xy)(xy)
+            #all_ = numpy.concatenate([f_mean_slm, observed_prevalence_slm])
+            #xy = numpy.vstack([f_mean_slm, observed_prevalence_slm])
+            #z = gaussian_kde(xy)(xy)
             # Sort the points by density, so that the densest points are plotted last
-            idx = z.argsort()
-            x, y, z = f_mean_slm[idx], observed_prevalence_slm[idx], z[idx]
-            ax.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=1, edgecolor='', zorder=1, label = 'Observed')
+            #idx = z.argsort()
+            #x, y, z = f_mean_slm[idx], observed_prevalence_slm[idx], z[idx]
+            #ax.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=1, edgecolor='', zorder=1, label = 'Observed')
+
+            sorted_plot_data = prevalence_utils.plot_color_by_pt_dens(f_mean_slm, observed_prevalence_slm, radius=prevalence_utils.color_radius, loglog=1)
+            x,y,z = sorted_plot_data[:, 0], sorted_plot_data[:, 1], sorted_plot_data[:, 2]
+
+            if len(sorted_plot_data[:, 0]) > prevalence_utils.n_points:
+                idx_ = numpy.random.choice(len(sorted_plot_data[:, 0]), size=prevalence_utils.n_points, replace=False)
+                x = x[idx_]
+                y = y[idx_]
+                z = z[idx_]
+
+            ax.scatter(x, y, c=numpy.sqrt(z), cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolors='none', zorder=1)
+            all_ = numpy.concatenate([x, y])
 
             ax.plot(10**bins_mean, 10**prevalence_predicted_mean, c='k', lw = 4, ls='--', label = 'Predicted', zorder=2)
 

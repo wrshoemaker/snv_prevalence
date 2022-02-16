@@ -230,16 +230,12 @@ def make_plot(variant_type):
 
         species_list_to_plot_good.append(species_name)
 
-
-
     ax_f_mean.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' mean\nSNV frequency across hosts', fontsize=11)
     ax_f_mean.set_ylabel('Probability density', fontsize=12)
     #ax_f_mean.set_ylim([-0.02, 0.9])
     ax_f_mean.set_yscale('log', basey=10)
     ax_f_mean.xaxis.set_tick_params(labelsize=8)
     ax_f_mean.yaxis.set_tick_params(labelsize=8)
-
-
 
     if len(means_all) > 0:
 
@@ -265,8 +261,6 @@ def make_plot(variant_type):
             k_trigamma = special.polygamma(1,k)
             gammalog = k*k_trigamma*x_range - numpy.exp(numpy.sqrt(k_trigamma)*x_range + k_digamma) - numpy.log(special.gamma(k)) + k*k_digamma + numpy.log10(numpy.exp(1))
             ax_f.plot(x_range, 10**gammalog, 'k', label='Gamma', lw=2)
-
-
 
             #x_log10_range =  numpy.linspace(min(means_log10_all) , max(means_log10_all) , 10000)
             x_log10_range =  numpy.linspace(min(means_log10_all_test) , max(means_log10_all_test) , 10000)

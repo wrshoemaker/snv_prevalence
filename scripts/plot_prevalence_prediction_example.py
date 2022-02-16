@@ -90,6 +90,11 @@ idx_ = z.argsort()
 x, y, z = observed_prevalence_slm[idx_], predicted_prevalence_slm[idx_], z[idx_]
 ax_prevalence_eco.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolor='', zorder=1)
 
+#sorted_plot_data = prevalence_utils.plot_color_by_pt_dens(observed_prevalence_slm, predicted_prevalence_slm, radius=prevalence_utils.color_radius, loglog=1)
+#x,y,z = sorted_plot_data[:, 0], sorted_plot_data[:, 1], sorted_plot_data[:, 2]
+#ax_prevalence_eco.scatter(x, y, c=numpy.sqrt(z), cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolors='none', zorder=1)
+#all_ = numpy.concatenate([x, y])
+
 max_ = max(all_)*1.2
 min_ = min(all_)*0.8
 
@@ -115,6 +120,13 @@ z = gaussian_kde(xy)(xy)
 idx_ = z.argsort()
 x, y, z = observed_prevalence[idx_], predicted_prevalence[idx_], z[idx_]
 ax_prevalence_evo.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolor='', zorder=1)
+
+#sorted_plot_data = prevalence_utils.plot_color_by_pt_dens(observed_prevalence, predicted_prevalence, radius=prevalence_utils.color_radius, loglog=1)
+#x,y,z = sorted_plot_data[:, 0], sorted_plot_data[:, 1], sorted_plot_data[:, 2]
+#ax_prevalence_evo.scatter(x, y, c=numpy.sqrt(z), cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolors='none', zorder=1)
+#all_ = numpy.concatenate([x, y])
+
+
 
 max_ = max(all_)*1.2
 min_ = min(all_)*0.8
@@ -150,13 +162,23 @@ prevalence_predicted_mean = numpy.asarray(prevalence_predicted_mean)
 all_ = numpy.concatenate([f_mean, observed_prevalence_slm])
 xy = numpy.vstack([f_mean, observed_prevalence_slm])
 z = gaussian_kde(xy)(xy)
-max_ = max(all_)*1.2
+#max_ = max(all_)*1.2
 #min_ = min(all_)*0.8
-min_ = 0.003864734299516908
+#min_ = 0.003864734299516908
 # Sort the points by density, so that the densest points are plotted last
 idx = z.argsort()
 x, y, z = f_mean[idx], observed_prevalence_slm[idx], z[idx]
 ax_abundance_prevalence_eco.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=1, edgecolor='', zorder=1, label = 'Observed')
+
+#sorted_plot_data = prevalence_utils.plot_color_by_pt_dens(f_mean, observed_prevalence_slm, radius=prevalence_utils.color_radius, loglog=1)
+#x,y,z = sorted_plot_data[:, 0], sorted_plot_data[:, 1], sorted_plot_data[:, 2]
+#ax_abundance_prevalence_eco.scatter(x, y, c=numpy.sqrt(z), cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolors='none', zorder=1, label = 'Observed')
+#all_ = numpy.concatenate([x, y])
+
+max_ = max(all_)*1.2
+#min_ = min(all_)*0.8
+min_ = 0.003864734299516908
+
 ax_abundance_prevalence_eco.plot(10**bins_mean, 10**prevalence_predicted_mean, c='k', lw = 3, ls='--', label = 'Predicted', zorder=2)
 ax_abundance_prevalence_eco.set_title("Stochastic Logistic Model", fontsize=12, fontweight='bold', color='k' )
 ax_abundance_prevalence_eco.set_xlim([min_, max_])
@@ -186,12 +208,19 @@ prevalence_predicted_mean = numpy.asarray(prevalence_predicted_mean)
 all_ = numpy.concatenate([f_max, observed_prevalence])
 xy = numpy.vstack([f_max, observed_prevalence])
 z = gaussian_kde(xy)(xy)
+
+#sorted_plot_data = prevalence_utils.plot_color_by_pt_dens(f_max, observed_prevalence, radius=prevalence_utils.color_radius, loglog=1)
+#x,y,z = sorted_plot_data[:, 0], sorted_plot_data[:, 1], sorted_plot_data[:, 2]
+#ax_abundance_prevalence_evo.scatter(x, y, c=numpy.sqrt(z), cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolors='none', zorder=1, label='Observed')
+#all_ = numpy.concatenate([x, y])
+
+
 max_ = max(all_)*1.2
 min_ = min(all_)*0.8
 # Sort the points by density, so that the densest points are plotted last
 idx = z.argsort()
 x, y, z = f_max[idx], observed_prevalence[idx], z[idx]
-ax_abundance_prevalence_evo.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=1, edgecolor='', zorder=1, label = 'Observed')
+ax_abundance_prevalence_evo.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=1, edgecolor='', zorder=1, label='Observed')
 ax_abundance_prevalence_evo.plot(10**bins_mean, 10**prevalence_predicted_mean, c='k', lw = 3, ls='--', label = 'Predicted', zorder=2)
 ax_abundance_prevalence_evo.set_title("Evolutionary Model", fontsize=12, fontweight='bold', color='k' )
 ax_abundance_prevalence_evo.set_xlim([min_, max_])
@@ -254,6 +283,11 @@ z = gaussian_kde(xy)(xy)
 idx_ = z.argsort()
 x, y, z = error_eco_no_nan[idx_], error_evo_no_nan[idx_], z[idx_]
 ax_error_vs.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolor='', zorder=1)
+
+#sorted_plot_data = prevalence_utils.plot_color_by_pt_dens(error_eco_no_nan, error_evo_no_nan, radius=prevalence_utils.color_radius, loglog=1)
+#x,y,z = sorted_plot_data[:, 0], sorted_plot_data[:, 1], sorted_plot_data[:, 2]
+#ax_error_vs.scatter(x, y, c=numpy.sqrt(z), cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolors='none', zorder=1)
+#all_ = numpy.concatenate([x, y])
 
 max_ = max(all_)*1.2
 min_ = min(all_)*0.8

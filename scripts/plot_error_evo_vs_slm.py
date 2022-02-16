@@ -74,14 +74,28 @@ def make_plot(variant_type):
 
             error_slm = numpy.absolute(observed_prevalence_slm_no_zeros - predicted_prevalence_slm_no_zeros) / observed_prevalence_slm_no_zeros
             error = numpy.absolute(observed_prevalence_no_zeros - predicted_prevalence_no_zeros) / observed_prevalence_no_zeros
-            all_ = numpy.concatenate([error_slm, error])
+            #all_ = numpy.concatenate([error_slm, error])
 
-            xy = numpy.vstack([error_slm, error])
-            z = gaussian_kde(xy)(xy)
+            #xy = numpy.vstack([error_slm, error])
+            #z = gaussian_kde(xy)(xy)
             # Sort the points by density, so that the densest points are plotted last
-            idx = z.argsort()
-            x, y, z = error_slm[idx], error[idx], z[idx]
-            ax.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolor='', zorder=1)
+            #idx = z.argsort()
+            #x, y, z = error_slm[idx], error[idx], z[idx]
+            #ax.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolor='', zorder=1)
+
+            sorted_plot_data = prevalence_utils.plot_color_by_pt_dens(error_slm, error, radius=prevalence_utils.color_radius, loglog=1)
+            x,y,z = sorted_plot_data[:, 0], sorted_plot_data[:, 1], sorted_plot_data[:, 2]
+
+            if len(sorted_plot_data[:, 0]) > prevalence_utils.n_points:
+                idx_ = numpy.random.choice(len(sorted_plot_data[:, 0]), size=prevalence_utils.n_points, replace=False)
+                x = x[idx_]
+                y = y[idx_]
+                z = z[idx_]
+
+            ax.scatter(x, y, c=numpy.sqrt(z), cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolors='none', zorder=1)
+
+            all_ = numpy.concatenate([x, y])
+
 
             #ax.scatter(observed_prevalence, predicted_prevalence, c='dodgerblue', s=90, alpha=0.9, edgecolor='', zorder=1)
             max_ = max(all_)*5

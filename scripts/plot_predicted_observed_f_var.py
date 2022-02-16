@@ -64,15 +64,28 @@ def make_plot(variant_type):
             if len(predicted_f_mean_no_zeros) == 0:
                 continue
 
-            all_ = numpy.concatenate([predicted_f_mean_no_zeros,observed_f_mean_no_zeros])
-
+            #all_ = numpy.concatenate([predicted_f_mean_no_zeros,observed_f_mean_no_zeros])
             # Calculate the point density
-            xy = numpy.vstack([observed_f_mean_no_zeros, predicted_f_mean_no_zeros])
-            z = gaussian_kde(xy)(xy)
-
+            #xy = numpy.vstack([observed_f_mean_no_zeros, predicted_f_mean_no_zeros])
+            #z = gaussian_kde(xy)(xy)
             # Sort the points by density, so that the densest points are plotted last
-            idx = z.argsort()
-            x, y, z = observed_f_mean_no_zeros[idx], predicted_f_mean_no_zeros[idx], z[idx]
+            #idx = z.argsort()
+            #x, y, z = observed_f_mean_no_zeros[idx], predicted_f_mean_no_zeros[idx], z[idx]
+
+
+            sorted_plot_data = prevalence_utils.plot_color_by_pt_dens(observed_f_mean_no_zeros, predicted_f_mean_no_zeros, radius=prevalence_utils.color_radius, loglog=1)
+            x,y,z = sorted_plot_data[:, 0], sorted_plot_data[:, 1], sorted_plot_data[:, 2]
+
+            if len(sorted_plot_data[:, 0]) > prevalence_utils.n_points:
+                idx_ = numpy.random.choice(len(sorted_plot_data[:, 0]), size=prevalence_utils.n_points, replace=False)
+                x = x[idx_]
+                y = y[idx_]
+                z = z[idx_]
+
+            ax.scatter(x, y, c=numpy.sqrt(z), cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolors='none', zorder=1)
+
+            all_ = numpy.concatenate([x, y])
+
 
             max_ = max(all_)*1.1
             min_ = min(all_)*0.8
@@ -81,7 +94,7 @@ def make_plot(variant_type):
             ax.set_xlim([min_, max_])
             ax.set_ylim([min_, max_])
 
-            ax.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=30, alpha=0.5, edgecolor='', zorder=1)
+            #ax.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=30, alpha=0.5, edgecolor='', zorder=1)
             ax.set_xscale('log', basex=10)
             ax.set_yscale('log', basey=10)
             ax.set_title(figure_utils.get_pretty_species_name(row), fontsize=14, fontweight='bold', color='k' )
