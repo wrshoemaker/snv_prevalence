@@ -109,14 +109,14 @@ def make_plot(variant_type, slm=True):
                 ax.legend(loc="upper left", fontsize=14)
 
             if (row_idx == 0):
-                ax.set_ylabel('Predicted SNV prevalence', fontsize=14)
+                ax.set_ylabel('Predicted allele prevalence', fontsize=14)
 
             if column_idx == len(nested_species_list)-1:
-                ax.set_xlabel('Observed SNV prevalence', fontsize=14)
+                ax.set_xlabel('Observed allele prevalence', fontsize=14)
 
             if column_idx == len(nested_species_list)-2:
                 if row_idx > len(nested_species_list[-1])-1:
-                    ax.set_xlabel('Observed SNV prevalence', fontsize=14)
+                    ax.set_xlabel('Observed allele prevalence', fontsize=14)
 
 
     fig.tight_layout()

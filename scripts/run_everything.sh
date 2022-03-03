@@ -13,8 +13,8 @@ python plot_prevalence_prediction_example.py
 python plot_prevalence_prediction_summary.py
 
 # Fig. 4
-python plot_prevalence_vs_error_mapgd_slm.py
-
+#python plot_prevalence_vs_error_mapgd_slm.py
+python plot_slm_error_vs_strainfinder
 
 # Supplement
 # Fig. S1

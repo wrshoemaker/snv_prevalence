@@ -115,7 +115,7 @@ def make_plot(variant_type):
                 ax.legend(loc="lower left", fontsize=8)
 
             if (row_idx == 0):
-                ax.set_ylabel('Fraction of SNVs ' + r'$\geq \epsilon$', fontsize=12)
+                ax.set_ylabel('Fraction of sites ' + r'$\geq \epsilon$', fontsize=12)
 
             if column_idx == len(nested_species_list)-1:
                 ax.set_xlabel('Relative error of prevalence prediction, ' + r'$\epsilon$', fontsize=12)

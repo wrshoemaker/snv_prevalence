@@ -27,7 +27,8 @@ import plot_utils
 
 numpy.random.seed(123456789)
 
-species_color_map, ordered_species_list = plot_utils.get_species_color_map()
+#species_color_map, ordered_species_list = plot_utils.get_species_color_map()
+species_color_map = prevalence_utils.species_color_map_genus
 
 prevalence_dict_mapgd = calculate_predicted_prevalence_mapgd.load_predicted_prevalence_dict_all()#test=True)
 

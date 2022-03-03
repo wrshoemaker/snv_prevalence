@@ -24,7 +24,8 @@ import calculate_predicted_prevalence_mapgd
 
 import plot_utils
 
-species_color_map, ordered_species_list = plot_utils.get_species_color_map()
+#species_color_map, ordered_species_list = plot_utils.get_species_color_map()
+species_color_map = prevalence_utils.species_color_map_genus
 
 prevalence_dict_mapgd = calculate_predicted_prevalence_mapgd.load_predicted_prevalence_dict_all()#test=True)
 
@@ -118,15 +119,15 @@ def make_plot(variant_type):
     species_list_sites_to_plot_pretty = [figure_utils.get_pretty_species_name(s) for s in species_list_sites_to_plot]
     colors_sites = [species_color_map[s] for s in species_list_hosts_to_plot]
     ax_n_sites.barh(species_list_sites_to_plot_pretty, n_sites_to_plot, height=0.8, align='center', color=colors_sites)
-    ax_n_sites.set_xlabel('Number of SNVs', fontsize=11)
+    ax_n_sites.set_xlabel('Number of sites', fontsize=11)
     ax_n_sites.xaxis.set_tick_params(labelsize=8)
     ax_n_sites.yaxis.set_tick_params(labelsize=7)
     ax_n_sites.set_ylim([-0.6, len(species_list_sites_to_plot_pretty)-0.3])
     ax_n_sites.set_xscale('log', basex =10)
 
-    sys.stderr.write("Min. # SNVs = %d\n" % min(n_sites_to_plot))
-    sys.stderr.write("Max. # SNVs = %d\n" % max(n_sites_to_plot))
-    sys.stderr.write("Median # SNVs = %f\n" % 10**numpy.median(numpy.log10(n_sites_to_plot)))
+    sys.stderr.write("Min. # sites = %d\n" % min(n_sites_to_plot))
+    sys.stderr.write("Max. # sites = %d\n" % max(n_sites_to_plot))
+    sys.stderr.write("Median # sites = %f\n" % 10**numpy.median(numpy.log10(n_sites_to_plot)))
 
 
     # plot everything else
@@ -230,7 +231,7 @@ def make_plot(variant_type):
 
         species_list_to_plot_good.append(species_name)
 
-    ax_f_mean.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' mean\nSNV frequency across hosts', fontsize=11)
+    ax_f_mean.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' mean\nallele frequency across hosts', fontsize=11)
     ax_f_mean.set_ylabel('Probability density', fontsize=12)
     #ax_f_mean.set_ylim([-0.02, 0.9])
     ax_f_mean.set_yscale('log', basey=10)
@@ -251,7 +252,9 @@ def make_plot(variant_type):
         if len(means_log10_all_test) > 0:
 
             slope, intercept, r_value, p_value, std_err = stats.linregress(means_log10_all_test, variances_log10_all_test)
-            #print(slope, intercept)
+
+            lower_ci, upper_ci = prevalence_utils.calculate_slope_ci(means_log10_all_test, variances_log10_all_test, n=int(len(means_log10_all_test)))
+            print('95% CI: ', lower_ci, upper_ci)
 
             # gamma AFD
             x_range = numpy.linspace(-4, 3, 10000)
@@ -268,7 +271,7 @@ def make_plot(variant_type):
             ax_f_mean_vs_var.plot(10**x_log10_range, 10**y_log10_fit_range, c='k', lw=2.5, linestyle='--', zorder=2, label=r'$\sigma^{{2}}_{{f}} \sim \bar{{f}}\,^{{{}}}$'.format(round(slope, 2)))
 
 
-    ax_f.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' SNV frequency', fontsize=11)
+    ax_f.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' + ' allele frequency', fontsize=11)
     ax_f.set_ylabel('Probability density', fontsize=12)
     #ax_f.set_ylim([-0.02, 1.23])
     ax_f.set_ylim([0.007, 1.04])
@@ -284,15 +287,15 @@ def make_plot(variant_type):
 
     ax_f_mean_vs_var.set_xscale('log', basex=10)
     ax_f_mean_vs_var.set_yscale('log', basey=10)
-    ax_f_mean_vs_var.set_xlabel('Mean SNV frequency across hosts, ' + r'$\bar{f}$', fontsize=11)
-    ax_f_mean_vs_var.set_ylabel('Variance of SNV frequencies across hosts, ' + r'$\sigma^{2}_{f}$', fontsize=10)
+    ax_f_mean_vs_var.set_xlabel('Mean allele frequency across hosts, ' + r'$\bar{f}$', fontsize=11)
+    ax_f_mean_vs_var.set_ylabel('Variance of allele frequencies across hosts, ' + r'$\sigma^{2}_{f}$', fontsize=10)
     ax_f_mean_vs_var.xaxis.set_tick_params(labelsize=8)
     ax_f_mean_vs_var.yaxis.set_tick_params(labelsize=8)
     ax_f_mean_vs_var.legend(loc='upper left', fontsize=11)
 
 
-    ax_f_prevalence.set_xlabel('Number of hosts where SNV is present (' + r'$f>0$' + ')', fontsize=11)
-    ax_f_prevalence.set_ylabel('Fraction of SNVs', fontsize=11)
+    ax_f_prevalence.set_xlabel('Number of hosts where allele is present (' + r'$f>0$' + ')', fontsize=11)
+    ax_f_prevalence.set_ylabel('Fraction of sites', fontsize=11)
     ax_f_prevalence.xaxis.set_tick_params(labelsize=8)
     ax_f_prevalence.yaxis.set_tick_params(labelsize=8)
     #ax_f_prevalence.set_xscale('log', basex=10)

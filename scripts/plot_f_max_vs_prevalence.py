@@ -110,16 +110,16 @@ def make_plot(variant_type):
                 ax.legend(loc="upper left", fontsize=14)
 
             if (row_idx == 0):
-                ax.set_ylabel('SNV Prevalence', fontsize=14)
+                ax.set_ylabel('Allele prevalence', fontsize=14)
 
 
             if column_idx == len(nested_species_list)-1:
-                ax.set_xlabel('Max. SNV frequency, ' + r'$f_{max}$', fontsize=14)
+                ax.set_xlabel('Max. allele frequency, ' + r'$f_{max}$', fontsize=14)
 
 
             if column_idx == len(nested_species_list)-2:
                 if row_idx > len(nested_species_list[-1])-1:
-                    ax.set_xlabel('Max. SNV frequency, ' + r'$f_{max}$', fontsize=14)
+                    ax.set_xlabel('Max. allele frequency, ' + r'$f_{max}$', fontsize=14)
 
 
     fig.tight_layout()

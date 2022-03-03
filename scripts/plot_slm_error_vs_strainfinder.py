@@ -45,8 +45,8 @@ else:
     best_status = ''
 
 
-species_color_map, ordered_species_list = plot_utils.get_species_color_map()
-
+#species_color_map, ordered_species_list = plot_utils.get_species_color_map()
+species_color_map = prevalence_utils.species_color_map_genus
 
 
 
@@ -455,14 +455,14 @@ strain_fraction_to_plot = [s[1] for s in species_fraction_strains_tuple]
 species_to_plot_pretty = [figure_utils.get_pretty_species_name(s) for s in species_to_plot]
 colors_hosts = [species_color_map[s] for s in species_to_plot]
 ax_strain.barh(species_to_plot_pretty, strain_fraction_to_plot, height=0.8, align='center', color=colors_hosts)
-ax_strain.set_xlabel('Strain prevalence\n(fraction of hosts with strain structure)', fontsize=11)
+ax_strain.set_xlabel('Fraction of hosts with strain structure', fontsize=11)
 ax_strain.xaxis.set_tick_params(labelsize=8)
 ax_strain.yaxis.set_tick_params(labelsize=9)
 ax_strain.set_ylim([-0.6, len(species_to_plot)-0.3])
 
 strain_fraction_median = numpy.median(strain_fraction_to_plot)
 ax_strain.axvline(x=strain_fraction_median, color='k', linestyle='--', label='Median', lw = 2.5, zorder=2)
-ax_strain.axvline(x=min(strain_fraction_to_plot), color='k', linestyle=':', label='Min. strain prevalence', lw = 2.5, zorder=2)
+ax_strain.axvline(x=min(strain_fraction_to_plot), color='k', linestyle=':', label='Min. fraction hosts w/ strains', lw = 2.5, zorder=2)
 ax_strain.legend(loc="upper right", fontsize=7)
 
 
@@ -514,8 +514,8 @@ ax_ex.scatter(-100, -100, color='k', linewidth=2, facecolors='white', s=60, labe
 ax_ex.scatter(-100, -100, color='k', s=60, label=r'$\hat{\varrho}  \geq 0.15$' + ', ' + r'$\rho=$' +  str(round(r_value_31, 3)) )
 ax_ex.set_xlim([0.05, 0.7])
 ax_ex.set_ylim([0.08, 0.92])
-ax_ex.set_xlabel('Strain prevalence', fontsize=11)
-ax_ex.set_ylabel('Mean relative error of SLM', fontsize=11)
+ax_ex.set_xlabel('Fraction of hosts with strain structure', fontsize=12)
+ax_ex.set_ylabel('Mean relative error (MRE), SLM', fontsize=12)
 ax_ex.legend(loc="upper left", fontsize=7)
 
 
@@ -546,10 +546,10 @@ x_offset = (max(n_to_plot_)  - min(n_to_plot_)) * 0.01
 ax_corr.set_xlim([min(n_to_plot_), max(n_to_plot_) ])
 ax_corr.set_xlabel('Minimum observed SNV prevalence', fontsize=11)
 ax_corr.set_ylabel('Correlation between\nSLM MRE and strain prevalence', fontsize=11)
-ax_corr.axhline(0, lw=1.5, ls='--',color='k', zorder=1, label='Zero correlation')
+ax_corr.axhline(0, lw=1.5, ls='--',color='k', zorder=1, label='No correlation')
 ax_corr.xaxis.set_tick_params(labelsize=8)
 ax_corr.yaxis.set_tick_params(labelsize=6.5)
-ax_corr.axvline(x=min(strain_fraction_to_plot), color='k', linestyle=':', label='Min. strain prevalence', lw = 2.5, zorder=2)
+ax_corr.axvline(x=min(strain_fraction_to_plot), color='k', linestyle=':', label='Min. fraction hosts w/ strains', lw = 2.5, zorder=2)
 
 ax_corr.legend(loc='upper right', fontsize=8)
 fig.tight_layout()
