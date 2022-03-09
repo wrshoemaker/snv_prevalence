@@ -185,11 +185,12 @@ ax_abundance_prevalence_eco.set_xlim([min_, max_])
 ax_abundance_prevalence_eco.set_ylim([min_, max_])
 ax_abundance_prevalence_eco.set_xscale('log', basex=10)
 ax_abundance_prevalence_eco.set_yscale('log', basey=10)
-ax_abundance_prevalence_eco.set_xlabel('Mean allele frequency, ' + r'$\bar{f}$', fontsize=12)
+ax_abundance_prevalence_eco.set_xlabel('Mean within-host allele\nfrequency across hosts, ' + r'$\bar{f}$', fontsize=12)
 ax_abundance_prevalence_eco.set_ylabel('Allele prevalence', fontsize=12)
 ax_abundance_prevalence_eco.legend(loc="upper left", fontsize=12)
 ax_abundance_prevalence_eco.xaxis.set_tick_params(labelsize=8)
 ax_abundance_prevalence_eco.yaxis.set_tick_params(labelsize=8)
+
 
 
 
@@ -227,7 +228,7 @@ ax_abundance_prevalence_evo.set_xlim([min_, max_])
 ax_abundance_prevalence_evo.set_ylim([min_, max_])
 ax_abundance_prevalence_evo.set_xscale('log', basex=10)
 ax_abundance_prevalence_evo.set_yscale('log', basey=10)
-ax_abundance_prevalence_evo.set_xlabel('Max. allele frequency, ' + r'$f_{max}$', fontsize=12)
+ax_abundance_prevalence_evo.set_xlabel('Max. within-host allele\nfrequency across hosts, ' + r'$f_{max}$', fontsize=12)
 ax_abundance_prevalence_evo.set_ylabel('Allele prevalence', fontsize=12)
 ax_abundance_prevalence_evo.legend(loc="upper left", fontsize=12)
 ax_abundance_prevalence_evo.xaxis.set_tick_params(labelsize=8)

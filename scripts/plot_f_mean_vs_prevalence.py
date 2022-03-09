@@ -115,12 +115,12 @@ def make_plot(variant_type):
 
 
             if column_idx == len(nested_species_list)-1:
-                ax.set_xlabel('Mean allele frequency, ' + r'$\bar{f}$', fontsize=14)
+                ax.set_xlabel('Mean within-host allele\nfrequency across hosts, ' + r'$\bar{f}$', fontsize=13)
 
 
             if column_idx == len(nested_species_list)-2:
                 if row_idx > len(nested_species_list[-1])-1:
-                    ax.set_xlabel('Mean allele frequency, ' + r'$\bar{f}$', fontsize=14)
+                    ax.set_xlabel('Mean within-host allele\nfrequency across hosts, ' + r'$\bar{f}$', fontsize=13)
 
 
     fig.tight_layout()

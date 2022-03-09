@@ -103,14 +103,14 @@ def make_plot(variant_type):
                 ax.legend(loc="upper left", fontsize=14)
 
             if (row_idx == 0):
-                ax.set_ylabel('Predicted mean allele frequency', fontsize=16)
+                ax.set_ylabel('Predicted mean within-host\nallele frequency across hosts', fontsize=13)
 
             if column_idx == len(nested_species_list)-1:
-                ax.set_xlabel('Observed mean allele frequency', fontsize=16)
+                ax.set_xlabel('Observed mean within-host\nallele frequency across hosts', fontsize=13)
 
             if column_idx == len(nested_species_list)-2:
                 if row_idx > len(nested_species_list[-1])-1:
-                    ax.set_xlabel('Observed mean allele frequency', fontsize=16)
+                    ax.set_xlabel('Observed mean within-host\nallele frequency across hosts', fontsize=13)
 
 
     fig.tight_layout()
