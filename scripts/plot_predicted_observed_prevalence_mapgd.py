@@ -132,6 +132,7 @@ if __name__=='__main__':
 
     for allowed_variant_type in allowed_variant_types:
 
-        for slm_status in [True, False]:
 
-            make_plot(variant_type=allowed_variant_type, slm=slm_status)
+        #for slm_status in [True, False]:
+
+        make_plot(variant_type=allowed_variant_type, slm=True)

@@ -103,7 +103,7 @@ def make_plot(variant_type):
             survival_slm_error = numpy.asarray(survival_slm_error)
 
             ax.plot(x_range, survival_slm_error, ls='-', lw=3, c=prevalence_utils.variant_color_dict[variant_type], zorder=2, label='SLM')
-            #ax.plot(x_range, survival_error, ls='--', lw=3, c=prevalence_utils.variant_color_dict[variant_type], zorder=2, label='Single-locus evolution')
+            ax.plot(x_range, survival_error, ls='--', lw=3, c=prevalence_utils.variant_color_dict[variant_type], zorder=2, label='Single-locus evolution')
 
 
             ax.set_xscale('log', basex=10)
@@ -132,6 +132,7 @@ def make_plot(variant_type):
     plt.close()
 
 
+    print(min(errors_greter_10_percent_all), max(errors_greter_10_percent_all))
 
 
 

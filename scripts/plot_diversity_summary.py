@@ -177,7 +177,7 @@ def make_plot(variant_type):
         ax_f.scatter(bins_mean_f_to_plot, hist_f_to_plot, alpha=0.9, s=10, c=species_color_map[species_name])
         # label=figure_utils.get_pretty_species_name(species_name)
 
-
+        #print('mean', max(f_mean_mapgd))
         f_mean_mapgd_log10 = numpy.log10(f_mean_mapgd)
         f_mean_mapgd_log10_rescaled = (f_mean_mapgd_log10 - numpy.mean(f_mean_mapgd_log10)) / numpy.std(f_mean_mapgd_log10)
         hist_f_mean, bin_edges_f_mean = numpy.histogram(f_mean_mapgd_log10_rescaled, density=True, bins=20)

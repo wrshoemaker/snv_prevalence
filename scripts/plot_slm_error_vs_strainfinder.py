@@ -50,7 +50,7 @@ species_color_map = prevalence_utils.species_color_map_genus
 
 
 
-def get_strain_abundances(species_name, samples):
+def get_strain_abundances_old(species_name, samples):
 
     intermediate_strain_filename_template = config.data_directory+"strain_data/%s.pkl"
 
@@ -73,6 +73,29 @@ def get_strain_abundances(species_name, samples):
 
             samples_to_keep.append(sample)
             richness_to_keep.append(len(abundances))
+
+    return samples_to_keep, richness_to_keep
+
+
+
+def get_strain_abundances(species_name, samples):
+
+    intermediate_strain_filename = config.data_directory+"strain_dict_sarah.pickle"
+
+    with open(intermediate_strain_filename, 'rb') as handle:
+        b = pickle.load(handle)
+
+    samples_to_keep = []
+    richness_to_keep = []
+
+    b_species = b[species_name]['North America']
+
+    for sample in samples:
+
+        if sample in b_species:
+
+            samples_to_keep.append(sample)
+            richness_to_keep.append(len(b_species[sample]))
 
     return samples_to_keep, richness_to_keep
 
@@ -418,8 +441,16 @@ species_1 = []
 
 
 
-low_prevalence = 0.049066563968316435
-high_prevalence = 0.15573958729018694
+#low_prevalence = 0.049066563968316435
+low_prevalence = 0.049151322237618575
+high_prevalence = 0.15699081652747476
+#high_prevalence = 0.15573958729018694
+
+
+#t = list(permutation_dict.keys())
+#t.sort()
+
+#print(t)
 
 prevalence_error_1 = permutation_dict[low_prevalence]['mean_error_all']
 prevalence_error_31 = permutation_dict[high_prevalence]['mean_error_all']
@@ -436,7 +467,7 @@ gs = gridspec.GridSpec(nrows=1, ncols=3)
 fig = plt.figure(figsize = (14, 4))
 ax_strain = fig.add_subplot(gs[0, 0])
 ax_ex = fig.add_subplot(gs[0, 1])
-ax_corr =fig.add_subplot(gs[0, 2])
+ax_corr = fig.add_subplot(gs[0, 2])
 
 ax_strain.text(-0.1, 1.04, prevalence_utils.sub_plot_labels[0], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_strain.transAxes)
 ax_ex.text(-0.1, 1.04, prevalence_utils.sub_plot_labels[1], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_ex.transAxes)
@@ -464,6 +495,12 @@ strain_fraction_median = numpy.median(strain_fraction_to_plot)
 ax_strain.axvline(x=strain_fraction_median, color='k', linestyle='--', label='Median', lw = 2.5, zorder=2)
 ax_strain.axvline(x=min(strain_fraction_to_plot), color='k', linestyle=':', label='Min. fraction hosts w/ strains', lw = 2.5, zorder=2)
 ax_strain.legend(loc="upper right", fontsize=7)
+
+
+strain_fraction_to_plot_ = numpy.asarray(strain_fraction_to_plot)
+
+print(strain_fraction_to_plot)
+print(min(strain_fraction_to_plot), max(strain_fraction_to_plot))
 
 
 
