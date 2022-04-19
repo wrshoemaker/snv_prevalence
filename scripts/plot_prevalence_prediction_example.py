@@ -43,7 +43,7 @@ ax_prevalence_eco = plt.subplot2grid((1, 3), (0, 0), colspan=1)
 ax_error = plt.subplot2grid((1, 3), (0, 1), colspan=1)
 ax_abundance_prevalence_eco = plt.subplot2grid((1, 3), (0, 2), colspan=1)
 
-ax_all = [ax_prevalence_eco, ax_abundance_prevalence_eco, ax_error]
+ax_all = [ax_prevalence_eco, ax_error, ax_abundance_prevalence_eco]
 for ax_idx, ax in enumerate(ax_all):
     ax.text(-0.1, 1.04, prevalence_utils.sub_plot_labels[ax_idx], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax.transAxes)
 

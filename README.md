@@ -1,11 +1,12 @@
-[![DOI:10.1101/2021.10.05.463161](http://img.shields.io/badge/DOI-10.1101/2021.10.05.463161-B31B1B.svg)](https://doi.org/10.1101/2021.10.05.463161)
+[![DOI:10.1101/2021.10.05.463161](http://img.shields.io/badge/DOI-10.1101/2021.10.05.463161-B31B1B.svg)](https://doi.org/10.1101/2022.04.07.487434)
 
 
 # snv_prevalence
 
 Repository for code associated with the preprint:
 
-A macroecological perspective on genetic diversity in the human gut microbiome
+[A macroecological perspective on genetic diversity in the human gut microbiome](https://doi.org/10.1101/2022.04.07.487434).
+
 
 
 ## Dependencies
