@@ -4,7 +4,7 @@ import config
 import parse_midas_data
 import os.path
 import os
-import pylab
+#import pylab
 import sys
 import numpy
 import gzip
@@ -15,27 +15,9 @@ import calculate_predicted_prevalence_mapgd
 from scipy import stats
 from scipy.stats import t
 
-import matplotlib.cm as cm
-from matplotlib import colors
+
 
 conf=0.95
-
-n_points=1000
-color_radius=2
-
-
-sub_plot_labels = ['a','b','c', 'd','e','f', 'g','h','i']
-
-good_species = 'Eubacterium_rectale_56927'
-bad_species = 'Bacteroides_vulgatus_57955'
-
-good_bad_color_dict = {good_species: 'dodgerblue', bad_species: '#FF6347'}
-good_bad_color_map_dict = {good_species: cm.Blues, bad_species: cm.Reds}
-
-variant_color_dict = {'4D': 'dodgerblue', '1D': '#FF6347'}
-
-variant_cmap_dict = {'4D': 'Blues', '1D': 'Reds'}
-
 
 
 
@@ -51,34 +33,10 @@ species_to_run = ['Alistipes_finegoldii_56071', 'Alistipes_onderdonkii_55464', '
 
 
 
-species_color_map_genus = {'Alistipes_finegoldii_56071': colors.hex2color(colors.cnames['lightgreen']),
-                    'Alistipes_onderdonkii_55464': colors.hex2color(colors.cnames['mediumseagreen']),
-                    'Alistipes_putredinis_61533': colors.hex2color(colors.cnames['seagreen']),
-                    'Alistipes_shahii_62199':  colors.hex2color(colors.cnames['darkgreen']),
-                    'Bacteroidales_bacterium_58650': colors.hex2color(colors.cnames['khaki']),
-                    'Bacteroides_caccae_53434': colors.hex2color(colors.cnames['mediumblue']),
-                    'Bacteroides_cellulosilyticus_58046': colors.hex2color(colors.cnames['aquamarine']),
-                    'Bacteroides_fragilis_54507': colors.hex2color(colors.cnames['steelblue']),
-                    'Bacteroides_ovatus_58035': colors.hex2color(colors.cnames['cyan']),
-                    'Bacteroides_stercoris_56735': colors.hex2color(colors.cnames['lightskyblue']),
-                    'Bacteroides_thetaiotaomicron_56941': colors.hex2color(colors.cnames['darkturquoise']),
-                    'Bacteroides_uniformis_57318': colors.hex2color(colors.cnames['teal']),
-                    'Bacteroides_vulgatus_57955': colors.hex2color(colors.cnames['dodgerblue']),
-                    'Bacteroides_xylanisolvens_57185': colors.hex2color(colors.cnames['cadetblue']),
-                    'Barnesiella_intestinihominis_62208': colors.hex2color(colors.cnames['darkorange']),
-                    'Dialister_invisus_61905': colors.hex2color(colors.cnames['sandybrown']),
-                    'Eubacterium_rectale_56927': colors.hex2color(colors.cnames['olive']),
-                    'Oscillibacter_sp_60799': colors.hex2color(colors.cnames['saddlebrown']),
-                    'Parabacteroides_distasonis_56985': colors.hex2color(colors.cnames['orchid']),
-                    'Parabacteroides_merdae_56972': colors.hex2color(colors.cnames['darkmagenta']),
-                    'Ruminococcus_bicirculans_59300': colors.hex2color(colors.cnames['orangered']),
-                    'Ruminococcus_bromii_62047': colors.hex2color(colors.cnames['darkred'])}
-
 
 
 # return format
 #(0.7985544021530181, 0.6151018838908112, 0.7982160707420223, 1.0)
-color_dict = {''}
 
 
 

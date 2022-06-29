@@ -93,10 +93,7 @@ def make_plot(variant_type):
     ax_n_hosts.yaxis.set_tick_params(labelsize=7)
     ax_n_hosts.set_ylim([-0.6, len(species_list_hosts_to_plot_pretty)-0.3])
 
-
-
     sys.stderr.write("%s sites\n" % variant_type)
-
     sys.stderr.write("Min. # hosts = %d\n" % min(hosts_to_plot))
     sys.stderr.write("Max. # hosts = %d\n" % max(hosts_to_plot))
     sys.stderr.write("Median # hosts = %f\n" % numpy.median(hosts_to_plot))
@@ -117,7 +114,7 @@ def make_plot(variant_type):
     n_sites_to_plot = [s[1] for s in species_n_sites_list]
 
     species_list_sites_to_plot_pretty = [figure_utils.get_pretty_species_name(s) for s in species_list_sites_to_plot]
-    colors_sites = [species_color_map[s] for s in species_list_hosts_to_plot]
+    colors_sites = [species_color_map[s] for s in species_list_sites_to_plot]
     ax_n_sites.barh(species_list_sites_to_plot_pretty, n_sites_to_plot, height=0.8, align='center', color=colors_sites)
     ax_n_sites.set_xlabel('Number of sites', fontsize=12)
     ax_n_sites.xaxis.set_tick_params(labelsize=8)
@@ -157,6 +154,9 @@ def make_plot(variant_type):
         f_var_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_var_mapgd']
         f_var_mapgd = numpy.asarray(f_var_mapgd)
 
+        f_max_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_max_mapgd']
+        f_max_mapgd = numpy.asarray(f_max_mapgd)
+
         observed_prevalence_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['observed_prevalence_mapgd_slm']
         observed_prevalence_mapgd = numpy.asarray(observed_prevalence_mapgd)
 
@@ -165,8 +165,10 @@ def make_plot(variant_type):
 
         f_mean_mapgd_to_plot = f_mean_mapgd[observed_prevalence_mapgd >= min_prevalence]
         f_var_mapgd_to_plot = f_var_mapgd[observed_prevalence_mapgd >= min_prevalence]
+        f_max_mapgd_to_plot = f_max_mapgd[observed_prevalence_mapgd >= min_prevalence]
 
-        f_no_zeros_mapgd_log10 = numpy.log10(f_no_zeros_mapgd)
+        #f_no_zeros_mapgd_log10 = numpy.log10(f_no_zeros_mapgd[f_no_zeros_mapgd<1])
+        f_no_zeros_mapgd_log10 = numpy.log10(f_no_zeros_mapgd[f_no_zeros_mapgd<1])
         f_no_zeros_mapgd_log10_rescaled = (f_no_zeros_mapgd_log10 - numpy.mean(f_no_zeros_mapgd_log10)) / numpy.std(f_no_zeros_mapgd_log10)
         hist_f, bin_edges_f = numpy.histogram(f_no_zeros_mapgd_log10_rescaled, density=True, bins=20)
         bins_mean_f = [0.5 * (bin_edges_f[i] + bin_edges_f[i+1]) for i in range(0, len(bin_edges_f)-1 )]
@@ -178,7 +180,7 @@ def make_plot(variant_type):
         # label=figure_utils.get_pretty_species_name(species_name)
 
         #print('mean', max(f_mean_mapgd))
-        f_mean_mapgd_log10 = numpy.log10(f_mean_mapgd)
+        f_mean_mapgd_log10 = numpy.log10(f_mean_mapgd[f_max_mapgd<1])
         f_mean_mapgd_log10_rescaled = (f_mean_mapgd_log10 - numpy.mean(f_mean_mapgd_log10)) / numpy.std(f_mean_mapgd_log10)
         hist_f_mean, bin_edges_f_mean = numpy.histogram(f_mean_mapgd_log10_rescaled, density=True, bins=20)
         bins_mean_f_mean = [0.5 * (bin_edges_f_mean[i] + bin_edges_f_mean[i+1]) for i in range(0, len(bin_edges_f_mean)-1 )]

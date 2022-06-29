@@ -28,7 +28,7 @@ import plot_utils
 numpy.random.seed(123456789)
 
 #species_color_map, ordered_species_list = plot_utils.get_species_color_map()
-species_color_map = prevalence_utils.species_color_map_genus
+species_color_map = plot_utils.species_color_map_genus
 
 prevalence_dict_mapgd = calculate_predicted_prevalence_mapgd.load_predicted_prevalence_dict_all()#test=True)
 
@@ -64,6 +64,7 @@ def calculate_null_prevalence_vs_error():
 
         n_non_zero_f = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['n_non_zero_frequencies']
         n_non_zero_f = numpy.asarray(n_non_zero_f)
+
 
         idx_ = (observed_prevalence_mapgd>0) & (predicted_prevalence_mapgd>0) & (n_non_zero_f<=max_n_occurances)
         observed_prevalence_mapgd = observed_prevalence_mapgd[idx_]
@@ -137,15 +138,16 @@ def make_plot(variant_type):
 
     fig = plt.figure(figsize = (8, 8))
 
-    ax_obs_vs_pred = plt.subplot2grid((6, 6), (0, 0), colspan=3, rowspan=3)
-    ax_error_dist = plt.subplot2grid((6, 6), (0, 3), colspan=3, rowspan=3)
+
+    ax_error_dist = plt.subplot2grid((6, 6), (0, 0), colspan=3, rowspan=3)
+    ax_obs_vs_pred = plt.subplot2grid((6, 6), (0, 3), colspan=3, rowspan=3)
     #ax_prevalence_vs_error = plt.subplot2grid((2, 2), (1, 0), colspan=1)
     ax_slope = plt.subplot2grid((6, 6), (3, 1), colspan=5, rowspan=3)
 
-    ax_all = [ax_obs_vs_pred, ax_error_dist, ax_slope]
-    ax_obs_vs_pred.text(-0.1, 1.04, prevalence_utils.sub_plot_labels[0], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_obs_vs_pred.transAxes)
-    ax_error_dist.text(-0.1, 1.04, prevalence_utils.sub_plot_labels[1], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_error_dist.transAxes)
-    ax_slope.text(-0.29, 1, prevalence_utils.sub_plot_labels[2], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_slope.transAxes)
+    #ax_all = [ax_obs_vs_pred, ax_error_dist, ax_slope]
+    ax_obs_vs_pred.text(-0.1, 1.04, plot_utils.sub_plot_labels[0], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_obs_vs_pred.transAxes)
+    ax_error_dist.text(-0.1, 1.04, plot_utils.sub_plot_labels[1], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_error_dist.transAxes)
+    ax_slope.text(-0.29, 1, plot_utils.sub_plot_labels[2], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_slope.transAxes)
 
 
     all_values = []
@@ -161,7 +163,12 @@ def make_plot(variant_type):
         n_non_zero_f = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['n_non_zero_frequencies']
         n_non_zero_f = numpy.asarray(n_non_zero_f)
 
-        idx_ = (observed_prevalence_mapgd>0) & (predicted_prevalence_mapgd>0)
+        f_max_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_max_mapgd']
+        f_max_mapgd = numpy.asarray(f_max_mapgd)
+
+
+
+        idx_ = (observed_prevalence_mapgd>0) & (predicted_prevalence_mapgd>0) & (f_max_mapgd<1)
         observed_prevalence_mapgd = observed_prevalence_mapgd[idx_]
         predicted_prevalence_mapgd = predicted_prevalence_mapgd[idx_]
         n_non_zero_f = n_non_zero_f[idx_]
@@ -195,8 +202,14 @@ def make_plot(variant_type):
         # label=figure_utils.get_pretty_species_name(species_name)
 
 
-        ax_error_dist.plot(10**bins_mean_to_plot, mean_error, lw=2, ls='-', c=species_color_map[species_name], alpha=0.5)
-        ax_error_dist.scatter(10**bins_mean_to_plot, mean_error, alpha=1, s=10, c=species_color_map[species_name])
+        error_log_rescaled = (numpy.log10(error) - numpy.mean(numpy.log10(error)))/numpy.std(numpy.log10(error))
+        hist, bin_edges = numpy.histogram(error_log_rescaled, density=True, bins=20)
+        bins_mean = [0.5 * (bin_edges[i] + bin_edges[i+1]) for i in range(0, len(bin_edges)-1 )]
+        ax_error_dist.scatter(bins_mean, hist, alpha=1, s=10, c=species_color_map[species_name])
+
+
+        #ax_error_dist.plot(10**bins_mean_to_plot, mean_error, lw=2, ls='-', c=species_color_map[species_name], alpha=0.5)
+        #ax_error_dist.scatter(10**bins_mean_to_plot, mean_error, alpha=1, s=10, c=species_color_map[species_name])
 
         # plot observed prevalence vs. mean error
         #n_non_zero_f_set = list(set(n_non_zero_f.tolist()) & set(max_n_occurances_range))
@@ -208,15 +221,17 @@ def make_plot(variant_type):
         # relationship between prevalence and error
         #rho = numpy.corrcoef(observed_prevalence_mapgd_log10, error)[0,1]
         #slope, intercept, r_value, p_value, std_err = stats.linregress(observed_prevalence_mapgd_log10, error)
-        rho = numpy.corrcoef(observed_prevalence_mapgd_log10, error)[0,1]
+        error_log10 = numpy.log10(error)
+        rho = numpy.corrcoef(observed_prevalence_mapgd_log10, error_log10)[0,1]
         #x_log10_range =  numpy.linspace(min(observed_prevalence_mapgd_log10) , max(observed_prevalence_mapgd_log10) , 10000)
         #y_fit_range = slope*x_log10_range + intercept
         #ax_prevalence_vs_error.plot(10**x_log10_range, y_fit_range, c=species_color_map[species_name], lw=2.5, linestyle='--', zorder=2)
 
         slope_null_all = []
         for i in range(iter):
-            error_permute = numpy.random.permutation(error)
+            error_permute = numpy.random.permutation(error_log10)
             rho_null = numpy.corrcoef(observed_prevalence_mapgd_log10, error_permute)[0,1]
+            #rho_null = numpy.corrcoef(observed_prevalence_mapgd_log10, error_permute)[0,1]
             #slope_null, intercept_null, r_value_null, p_value_null, std_err_null = stats.linregress(observed_prevalence_mapgd_log10, error_permute)
             slope_null_all.append(rho_null)
         slope_null_all = numpy.asarray(slope_null_all)
@@ -247,16 +262,19 @@ def make_plot(variant_type):
     ax_obs_vs_pred.xaxis.set_tick_params(labelsize=8)
     ax_obs_vs_pred.yaxis.set_tick_params(labelsize=8)
 
-    #ax_error_dist.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' +  ' relative error, SLM', fontsize=11)
-    ax_error_dist.set_xlabel('Observed prevalence', fontsize=11)
-    ax_error_dist.set_ylabel('Mean relative error', fontsize=11)
+    ax_error_dist.set_xlabel('Rescaled ' + r'$\mathrm{log}_{10}$' +  ' relative error', fontsize=11)
+    ax_error_dist.set_ylabel('Probability density', fontsize=11)
+    #ax_error_dist.set_xlabel('Observed prevalence', fontsize=11)
+    #ax_error_dist.set_ylabel('Mean relative error', fontsize=11)
 
 
-    #ax_error_dist.set_ylabel('Probability density', fontsize=11)
+    #
     #ax_f_mean.set_ylim([-0.02, 0.9])
-    ax_error_dist.set_xlim([0.005, 1])
+    #ax_error_dist.set_xlim([0.005, 1])
     #ax_error_dist.set_ylim([0.08, 1.05])
-    ax_error_dist.set_xscale('log', basex=10)
+    #ax_error_dist.set_xscale('log', basex=10)
+    ax_error_dist.set_xlim([-9, 3])
+    ax_error_dist.set_ylim([0.00003, 4])
     ax_error_dist.set_yscale('log', basey=10)
     ax_error_dist.xaxis.set_tick_params(labelsize=8)
     ax_error_dist.yaxis.set_tick_params(labelsize=8)
@@ -304,7 +322,7 @@ def make_plot(variant_type):
 
         print(slope)
 
-    ax_slope.set_xlim([-1, 0.3])
+    ax_slope.set_xlim([-0.8, 0.3])
     ax_slope.set_ylim([-0.5, len(species_sorted)])
     #ax_slope.axvline(x=0, color='k', linestyle='--', lw = 2, zorder=1)
 

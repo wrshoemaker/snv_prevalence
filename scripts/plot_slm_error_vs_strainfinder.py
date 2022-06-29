@@ -170,9 +170,12 @@ def make_error_dict():
         n_non_zero_frequencies = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['n_non_zero_frequencies']
         n_non_zero_frequencies = numpy.asarray(n_non_zero_frequencies)
 
-        predicted_prevalence_no_zeros = predicted_prevalence[(observed_prevalence>0) & (predicted_prevalence>0) ]
-        observed_prevalence_no_zeros = observed_prevalence[(observed_prevalence>0) & (predicted_prevalence>0) ]
-        n_non_zero_frequencies_no_zeros = n_non_zero_frequencies[(observed_prevalence>0) & (predicted_prevalence>0)]
+        f_max_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_max_mapgd']
+        f_max_mapgd = numpy.asarray(f_max_mapgd)
+
+        predicted_prevalence_no_zeros = predicted_prevalence[(observed_prevalence>0) & (predicted_prevalence>0) & (f_max_mapgd<1) ]
+        observed_prevalence_no_zeros = observed_prevalence[(observed_prevalence>0) & (predicted_prevalence>0) & (f_max_mapgd<1) ]
+        n_non_zero_frequencies_no_zeros = n_non_zero_frequencies[(observed_prevalence>0) & (predicted_prevalence>0) & (f_max_mapgd<1)]
 
         if len(observed_prevalence_no_zeros) == 0:
             continue

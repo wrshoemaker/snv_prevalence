@@ -446,13 +446,13 @@ def predict_prevalence_slm(freqs, depths, f_mean=None, beta=None, min_minor_alle
 
 
 
-def load_predicted_prevalence_subsample_dict():
+#def load_predicted_prevalence_subsample_dict():
 
-    intermediate_filename = config.data_directory+"predicted_prevalence_mapgd_test.dat"
+#    intermediate_filename = config.data_directory+"predicted_prevalence_mapgd_test.dat"
 
-    with open(intermediate_filename, 'rb') as handle:
-        b = pickle.load(handle)
-    return b
+#    with open(intermediate_filename, 'rb') as handle:
+#        b = pickle.load(handle)
+#    return b
 
 
 
@@ -958,7 +958,6 @@ def make_pi_and_parameter_dict_and_predict_prevalence(species_to_run='all'):
             sys.stderr.write("Getting parameter dict...\n")
             parameter_dict_clade = parameter_dict[clade_type]
             sys.stderr.write("Done!\n")
-
             sys.stderr.write("Making prevalence dict...\n")
 
             for key, value in parameter_dict_clade.items():
@@ -1202,6 +1201,7 @@ def load_predicted_prevalence_dict_all(test=False):
                 clade_type = split[1] + '_' + split[2]
 
             if test == True:
+                #if species != 'Bacteroides_vulgatus_57955':
                 if species != 'Bacteroides_vulgatus_57955':
                     continue
 
