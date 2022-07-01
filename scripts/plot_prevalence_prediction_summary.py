@@ -169,11 +169,14 @@ def make_plot(variant_type):
 
 
         idx_ = (observed_prevalence_mapgd>0) & (predicted_prevalence_mapgd>0) & (f_max_mapgd<1)
+        #idx_ = (observed_prevalence_mapgd>0) & (predicted_prevalence_mapgd>0)
         observed_prevalence_mapgd = observed_prevalence_mapgd[idx_]
         predicted_prevalence_mapgd = predicted_prevalence_mapgd[idx_]
         n_non_zero_f = n_non_zero_f[idx_]
 
         error = numpy.absolute(observed_prevalence_mapgd-predicted_prevalence_mapgd)/observed_prevalence_mapgd
+
+        print(species_name, sum(error<0.1)/len(error))
 
         observed_prevalence_mapgd_log10 = numpy.log10(observed_prevalence_mapgd)
         predicted_prevalence_mapgd_log10 = numpy.log10(predicted_prevalence_mapgd)

@@ -45,7 +45,7 @@ ax_abundance_prevalence_eco = plt.subplot2grid((1, 3), (0, 2), colspan=1)
 
 ax_all = [ax_prevalence_eco, ax_error, ax_abundance_prevalence_eco]
 for ax_idx, ax in enumerate(ax_all):
-    ax.text(-0.1, 1.04, prevalence_utils.sub_plot_labels[ax_idx], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax.transAxes)
+    ax.text(-0.1, 1.04, plot_utils.sub_plot_labels[ax_idx], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax.transAxes)
 
 
 
@@ -59,6 +59,9 @@ predicted_prevalence_slm = numpy.asarray(predicted_prevalence_slm)
 
 f_mean = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_mean_mapgd']
 f_mean = numpy.asarray(f_mean)
+
+#f_max_mapgd = prevalence_dict_mapgd[species_name][clade_type][pi_type][variant_type]['f_max_mapgd']
+#f_max_mapgd = numpy.asarray(f_max_mapgd)
 
 
 
@@ -76,7 +79,7 @@ z = gaussian_kde(xy)(xy)
 # Sort the points by density, so that the densest points are plotted last
 idx_ = z.argsort()
 x, y, z = observed_prevalence_slm[idx_], predicted_prevalence_slm[idx_], z[idx_]
-ax_prevalence_eco.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolor='', zorder=1)
+ax_prevalence_eco.scatter(x, y, c=z, cmap=plot_utils.variant_cmap_dict[variant_type], s=90, alpha=0.9, edgecolor='', zorder=1)
 
 
 
@@ -125,7 +128,7 @@ z = gaussian_kde(xy)(xy)
 # Sort the points by density, so that the densest points are plotted last
 idx = z.argsort()
 x, y, z = f_mean[idx], observed_prevalence_slm[idx], z[idx]
-ax_abundance_prevalence_eco.scatter(x, y, c=z, cmap=prevalence_utils.variant_cmap_dict[variant_type], s=90, alpha=1, edgecolor='', zorder=1, label = 'Observed')
+ax_abundance_prevalence_eco.scatter(x, y, c=z, cmap=plot_utils.variant_cmap_dict[variant_type], s=90, alpha=1, edgecolor='', zorder=1, label = 'Observed')
 
 
 max_ = max(all_)*1.2
