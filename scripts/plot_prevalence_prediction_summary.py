@@ -145,8 +145,8 @@ def make_plot(variant_type):
     ax_slope = plt.subplot2grid((6, 6), (3, 1), colspan=5, rowspan=3)
 
     #ax_all = [ax_obs_vs_pred, ax_error_dist, ax_slope]
-    ax_obs_vs_pred.text(-0.1, 1.04, plot_utils.sub_plot_labels[0], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_obs_vs_pred.transAxes)
-    ax_error_dist.text(-0.1, 1.04, plot_utils.sub_plot_labels[1], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_error_dist.transAxes)
+    ax_error_dist.text(-0.1, 1.04, plot_utils.sub_plot_labels[0], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_error_dist.transAxes)
+    ax_obs_vs_pred.text(-0.1, 1.04, plot_utils.sub_plot_labels[1], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_obs_vs_pred.transAxes)
     ax_slope.text(-0.29, 1, plot_utils.sub_plot_labels[2], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax_slope.transAxes)
 
 
@@ -248,7 +248,6 @@ def make_plot(variant_type):
         slope_dict[species_name]['median'] = median
         slope_dict[species_name]['lower_ci'] = lower_ci
         slope_dict[species_name]['upper_ci'] = upper_ci
-
 
 
     min_ = 10**min(all_values)

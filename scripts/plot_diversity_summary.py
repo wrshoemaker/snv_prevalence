@@ -25,7 +25,7 @@ import calculate_predicted_prevalence_mapgd
 import plot_utils
 
 #species_color_map, ordered_species_list = plot_utils.get_species_color_map()
-species_color_map = prevalence_utils.species_color_map_genus
+species_color_map = plot_utils.species_color_map_genus
 
 prevalence_dict_mapgd = calculate_predicted_prevalence_mapgd.load_predicted_prevalence_dict_all()#test=True)
 
@@ -66,7 +66,7 @@ def make_plot(variant_type):
     ax_all = [ax_n_hosts, ax_n_sites, ax_f, ax_f_mean, ax_f_mean_vs_var, ax_f_prevalence]
 
     for ax_idx, ax in enumerate(ax_all):
-        ax.text(-0.1, 1.04, prevalence_utils.sub_plot_labels[ax_idx], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax.transAxes)
+        ax.text(-0.1, 1.04, plot_utils.sub_plot_labels[ax_idx], fontsize=10, fontweight='bold', ha='center', va='center', transform=ax.transAxes)
 
 
     if clade_type == 'all':
@@ -136,6 +136,8 @@ def make_plot(variant_type):
     means_all_for_prevalence = []
     species_list_to_plot_good = []
 
+    f_no_zeros_mapgd_log10_rescaled_all = []
+
     min_all = []
     for species_name in species_list_sites_to_plot:
 
@@ -168,7 +170,7 @@ def make_plot(variant_type):
         f_max_mapgd_to_plot = f_max_mapgd[observed_prevalence_mapgd >= min_prevalence]
 
         #f_no_zeros_mapgd_log10 = numpy.log10(f_no_zeros_mapgd[f_no_zeros_mapgd<1])
-        f_no_zeros_mapgd_log10 = numpy.log10(f_no_zeros_mapgd[f_no_zeros_mapgd<1])
+        f_no_zeros_mapgd_log10 = numpy.log10(f_no_zeros_mapgd)
         f_no_zeros_mapgd_log10_rescaled = (f_no_zeros_mapgd_log10 - numpy.mean(f_no_zeros_mapgd_log10)) / numpy.std(f_no_zeros_mapgd_log10)
         hist_f, bin_edges_f = numpy.histogram(f_no_zeros_mapgd_log10_rescaled, density=True, bins=20)
         bins_mean_f = [0.5 * (bin_edges_f[i] + bin_edges_f[i+1]) for i in range(0, len(bin_edges_f)-1 )]
@@ -178,6 +180,8 @@ def make_plot(variant_type):
 
         ax_f.scatter(bins_mean_f_to_plot, hist_f_to_plot, alpha=0.9, s=10, c=species_color_map[species_name])
         # label=figure_utils.get_pretty_species_name(species_name)
+
+        f_no_zeros_mapgd_log10_rescaled_all.extend(f_no_zeros_mapgd_log10_rescaled.tolist())
 
         #print('mean', max(f_mean_mapgd))
         f_mean_mapgd_log10 = numpy.log10(f_mean_mapgd[f_max_mapgd<1])
@@ -240,6 +244,8 @@ def make_plot(variant_type):
     ax_f_mean.xaxis.set_tick_params(labelsize=8)
     ax_f_mean.yaxis.set_tick_params(labelsize=8)
 
+    f_no_zeros_mapgd_log10_rescaled_all = numpy.asarray(f_no_zeros_mapgd_log10_rescaled_all)
+
     if len(means_all) > 0:
 
         means_all = numpy.asarray(means_all)
@@ -260,12 +266,14 @@ def make_plot(variant_type):
 
             # gamma AFD
             x_range = numpy.linspace(-4, 3, 10000)
-            #k = 2.0
-            k = slope
+
+            k = 2.0
+            #k = slope
+            #k = intercept
             k_digamma = special.digamma(k)
             k_trigamma = special.polygamma(1,k)
             gammalog = k*k_trigamma*x_range - numpy.exp(numpy.sqrt(k_trigamma)*x_range + k_digamma) - numpy.log(special.gamma(k)) + k*k_digamma + numpy.log10(numpy.exp(1))
-            ax_f.plot(x_range, 10**gammalog, 'k', label='Gamma', lw=2)
+            ax_f.plot(x_range, 10**gammalog, 'k', label='Gamma', lw=3)
 
             #x_log10_range =  numpy.linspace(min(means_log10_all) , max(means_log10_all) , 10000)
             x_log10_range =  numpy.linspace(min(means_log10_all_test) , max(means_log10_all_test) , 10000)
